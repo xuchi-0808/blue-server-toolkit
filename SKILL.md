@@ -409,7 +409,8 @@ fi
 
 To add a new script to this skill:
 
-1. Embed it as a code block in the "## Scripts" section above
-2. Bump the version in frontmatter `metadata.version`
+1. Add the script to the `scripts/` directory in the repository
+2. Embed it as a code block in the "## Scripts" section above
+3. Bump the version in frontmatter `metadata.version`
 
 The AI will extract new scripts on the next activation after version update.
