@@ -159,6 +159,8 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 #!/bin/bash
 # blue_server_handler - NPU Status Check
 # Version: 0.9
+# Runs npu-smi info on the target server via SSH (optionally inside a container).
+#
 # Usage: bash check-npu.sh <host> <user> [container]
 
 HOST=$1
@@ -183,6 +185,8 @@ fi
 #!/bin/bash
 # blue_server_handler - Start Docker Container
 # Version: 0.9
+# Creates a Docker container with Ascend NPU device mappings and data mounts.
+#
 # Usage: bash start-docker.sh <image_id> <container_name>
 
 IMAGES_ID=$1
@@ -219,6 +223,8 @@ docker run --name ${NAME} -it -d --net=host --shm-size=500g \
 #!/bin/bash
 # blue_server_handler - Initialize Configuration
 # Version: 0.9
+# Creates ~/.blue_server_handler/ directory structure and a template config.
+#
 # Usage: bash init-config.sh
 
 CONFIG_DIR="$HOME/.blue_server_handler"
@@ -243,9 +249,10 @@ if [ ! -f "$CONFIG_FILE" ]; then
   "default_server": "s1"
 }
 EOF
-  echo "Template config created at $CONFIG_FILE. Fill in your server info, or ask AI to help."
+  echo "✅ Template config created at $CONFIG_FILE"
+  echo "   Fill in your server info, or ask AI to help configure it."
 else
-  echo "Config already exists at $CONFIG_FILE"
+  echo "ℹ️  Config already exists at $CONFIG_FILE"
 fi
 ```
 
