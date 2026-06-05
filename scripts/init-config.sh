@@ -20,7 +20,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
       "host": "__your_host__",
       "user": "__your_user__",
       "port": 22,
-      "container": "__your_container__",
+      "container": null,
       "desc": "主开发服务器"
     }
   ],
