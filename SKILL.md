@@ -151,6 +151,10 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 首次激活时提取到 `~/.blue_server_handler/scripts/`。它们处理特定的
 高频操作——用得上就用，用不上直接自己拼命令也行。
 
+注意：`start-docker.sh` 需要在服务器上执行，用之前先 scp 过去：
+`scp ~/.blue_server_handler/scripts/start-docker.sh {user}@{host}:~/`
+然后通过 SSH 远程执行：`bash ~/start-docker.sh {image_id} {container_name}`
+
 ### check-npu.sh
 
 ```bash
