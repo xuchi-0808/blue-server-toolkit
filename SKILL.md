@@ -1,5 +1,5 @@
 ---
-name: blue_server_handler
+name: blue-server-handler
 description: >-
   操作远程开发服务器（蓝区服务器）时使用。提供 SSH 连接检查、代码同步、
   UT 运行、模型下载、日志查看、容器管理等常见操作的模式参考和辅助脚本。
