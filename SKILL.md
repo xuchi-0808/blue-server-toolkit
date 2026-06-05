@@ -98,6 +98,9 @@ Compare `config.json.version` with this SKILL.md's version:
 
 ## Configuration Management
 
+The full config schema is available in `config.example.json` (shipped with this
+repo). Users can reference it to see all available fields.
+
 ### Reading Config
 
 Read `~/.blue_server_handler/config.json` at the start of each activation.
