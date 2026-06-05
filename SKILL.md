@@ -84,6 +84,7 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 ### 代码操作
 | 操作 | 命令 |
 |------|------|
+| 创建目录 | `ssh {user}@{host} "mkdir -p {target_dir}"` |
 | 克隆仓库 | `ssh {user}@{host} "git clone {repo_url} {target_dir}"` |
 | 强制拉取 | `ssh {user}@{host} "cd {repo_dir} && git fetch origin && git reset --hard origin/{branch}"` |
 | 切换分支 | `ssh {user}@{host} "cd {repo_dir} && git checkout {branch}"` |
@@ -93,13 +94,15 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 | 操作 | 命令 |
 |------|------|
 | 单文件 | `ssh {user}@{host} "cd {repo_dir} && python3 -m pytest {test_file} -v"` |
+| 批量文件 | `ssh {user}@{host} "cd {repo_dir} && python3 -m pytest {file1} {file2} -v"` |
 | 覆盖率 | `ssh {user}@{host} "cd {repo_dir} && coverage run -m pytest {test_file} -v && coverage report -m"` |
 
 ### 模型下载
 | 操作 | 命令 |
 |------|------|
-| 后台下载 | `ssh {user}@{host} "nohup modelscope download {model_id} >> download.log 2>&1 &"` |
-| 查看进度 | `ssh {user}@{host} "tail -f download.log"` |
+| 后台下载 | `ssh {user}@{host} "cd {weights_root} && nohup modelscope download {model_id} --max-workers 16 >> download.log 2>&1 &"` |
+| 查看进度 | `ssh {user}@{host} "tail -f {weights_root}/download.log"` |
+| 已完成大小 | `ssh {user}@{host} "du -sh {weights_root}/{model_name}"` |
 
 ### 日志查看
 | 操作 | 命令 |
@@ -112,8 +115,10 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 ### 容器管理
 | 操作 | 命令 |
 |------|------|
+| 创建容器 | `ssh {user}@{host} "docker run -itd --name {container} --net=host --shm-size=128g --privileged=true -v /data:/data {image} bash -c 'sleep infinity'"` |
 | 查看状态 | `ssh {user}@{host} "docker ps -a \| grep {container}"` |
 | 启动 | `ssh {user}@{host} "docker start {container}"` |
+| 交互式进入 | `ssh -t {user}@{host} "docker exec -it {container} bash"` |
 | 执行命令 | `ssh {user}@{host} "docker exec {container} bash -c '{command}'"` |
 
 ### 文件同步
