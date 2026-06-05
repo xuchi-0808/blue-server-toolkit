@@ -27,16 +27,16 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 
 ## First Activation
 
-检查 `~/.blue_server_handler/config.json`。存在则读取，不存在则向用户
+检查 `~/.blue_server_toolkit/config.json`。存在则读取，不存在则向用户
 询问基本信息（host、user）并创建。`container` 字段可选。
 
-如果脚本还没安装，从下方 Scripts 章节提取到 `~/.blue_server_handler/scripts/`。
+如果脚本还没安装，从下方 Scripts 章节提取到 `~/.blue_server_toolkit/scripts/`。
 如果 skill 源码仓在本地可用（用户已 clone），直接 cp 仓中的 `scripts/` 和
-`config.json` 到 `~/.blue_server_handler/` 更可靠。
+`config.json` 到 `~/.blue_server_toolkit/` 更可靠。
 
 ## 配置说明
 
-配置文件位于 `~/.blue_server_handler/config.json`，结构如下：
+配置文件位于 `~/.blue_server_toolkit/config.json`，结构如下：
 
 ```json
 {
@@ -94,7 +94,7 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 | 操作 | 命令 |
 |------|------|
 | SSH 心跳 | `ssh -o ConnectTimeout=5 {user}@{host} "echo OK"` |
-| NPU 状态 | `bash ~/.blue_server_handler/scripts/check-npu.sh {host} {user} [{container}]` |
+| NPU 状态 | `bash ~/.blue_server_toolkit/scripts/check-npu.sh {host} {user} [{container}]` |
 | 磁盘空间 | `ssh {user}@{host} "df -h"` |
 
 ### 代码操作
@@ -146,18 +146,18 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 
 ## 脚本
 
-首次激活时提取到 `~/.blue_server_handler/scripts/`。它们处理特定的
+首次激活时提取到 `~/.blue_server_toolkit/scripts/`。它们处理特定的
 高频操作——用得上就用，用不上直接自己拼命令也行。
 
 注意：`start-docker.sh` 需要在服务器上执行，用之前先 scp 过去：
-`scp ~/.blue_server_handler/scripts/start-docker.sh {user}@{host}:~/`
+`scp ~/.blue_server_toolkit/scripts/start-docker.sh {user}@{host}:~/`
 然后通过 SSH 远程执行：`bash ~/start-docker.sh {image_id} {container_name}`
 
 ### check-npu.sh
 
 ```bash
 #!/bin/bash
-# blue_server_handler - NPU Status Check
+# blue_server_toolkit - NPU Status Check
 # Version: 0.9
 # Runs npu-smi info on the target server via SSH (optionally inside a container).
 #
@@ -183,7 +183,7 @@ fi
 
 ```bash
 #!/bin/bash
-# blue_server_handler - Start Docker Container
+# blue_server_toolkit - Start Docker Container
 # Version: 0.9
 # Creates a Docker container with Ascend NPU device mappings and data mounts.
 #
@@ -221,13 +221,13 @@ docker run --name ${NAME} -it -d --net=host --shm-size=500g \
 
 ```bash
 #!/bin/bash
-# blue_server_handler - Initialize Configuration
+# blue_server_toolkit - Initialize Configuration
 # Version: 0.9
-# Creates ~/.blue_server_handler/ directory structure and a template config.
+# Creates ~/.blue_server_toolkit/ directory structure and a template config.
 #
 # Usage: bash init-config.sh
 
-CONFIG_DIR="$HOME/.blue_server_handler"
+CONFIG_DIR="$HOME/.blue_server_toolkit"
 CONFIG_FILE="$CONFIG_DIR/config.json"
 
 mkdir -p "$CONFIG_DIR"
