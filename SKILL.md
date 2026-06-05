@@ -383,7 +383,7 @@ fi
 CONFIG_DIR="$HOME/.blue_server_handler"
 CONFIG_FILE="$CONFIG_DIR/config.json"
 
-mkdir -p "$CONFIG_DIR/scripts"
+mkdir -p "$CONFIG_DIR/scripts_${VERSION}"
 
 if [ ! -f "$CONFIG_FILE" ]; then
   cat > "$CONFIG_FILE" << 'EOF'
@@ -412,8 +412,8 @@ fi
 
 To add a new script to this skill:
 
-1. Add the script to the `scripts/` directory in the repository
+1. Add the script to the `scripts_0_9/` directory in the repository
 2. Embed it as a code block in the "## Scripts" section above (must be identical)
 3. Bump the version in frontmatter `metadata.version`
 
-**Important**: Before release, verify that `scripts/` files and SKILL.md code blocks are identical. The AI extracts scripts from SKILL.md; `scripts/` is the development source of truth for verification.
+**Important**: Before release, verify that `scripts_0_9/` files and SKILL.md code blocks are identical. The AI extracts scripts from SKILL.md; `scripts_0_9/` is the development source of truth for verification.
