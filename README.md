@@ -1,4 +1,4 @@
-# Blue Server Handler
+# Blue Server Toolkit v0.9
 
 一套通用 AI skill，用于操作远程开发服务器（蓝区服务器）。覆盖 80% 日常高频操作：连接检查、代码同步、UT 运行、模型下载、日志查看、容器管理、文件传输。
 

@@ -7,7 +7,7 @@ metadata:
   version: 0.9
 ---
 
-# Blue Server Handler
+# Blue Server Toolkit
 
 ## Overview
 
