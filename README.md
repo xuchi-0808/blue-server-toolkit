@@ -13,13 +13,13 @@
 
 ### 1. 安装
 
-本 skill 只有一个文件：`SKILL.md`。把它放到你的 AI 工具的 skills 目录即可。
+#### 推荐方式：让 AI 帮你安装（无需手动找路径）
 
-**推荐方式：让 AI 帮你安装（无需手动找路径）**
+把这个 skill 的源码目录告诉 AI，AI 会帮你完成安装，例如：
 
-把这个 skill 的源码目录告诉 AI，AI 会帮你完成安装：
-
-> 我正在使用 Claude Code（或其他工具名），请阅读 `~/code/blue_server_handler/SKILL.md` 的内容，帮我把这个 skill 安装到正确的位置。安装完成后告诉我如何使用。
+```text
+我正在使用 Claude Code（或其他工具名），请阅读 /home/<user>/Documents/Code/AgentSkills/blue_server_handler/ 的内容，帮我把这个 skill 正确安装。安装完成后告诉我如何使用。
+```
 
 把上面这段话中的路径改成你的实际路径，AI 就会：
 1. 读取 SKILL.md 了解技能内容
@@ -27,7 +27,7 @@
 3. 完成安装
 4. 引导你进行首次配置
 
-**备选：手动安装**
+#### 备选：手动安装
 
 | Tool | Skills 目录 |
 |------|-------------|
@@ -91,28 +91,16 @@ AI 会在首次激活时引导你完成配置。你随时可以直接告诉 AI �
 
 ## Development
 
-```bash
-# Clone
-git clone <repo-url>
-cd blue_server_handler
+### 目录结构
 
-# Directory structure
-# blue_server_handler/
-# ├── SKILL.md              # 主 skill 文件
-# ├── README.md             # 本文件
-# ├── LICENSE
-# ├── .gitignore
-# └── scripts/              # 脚本源码
-#     ├── init-config.sh
-#     └── check-npu.sh
 ```
-
-### 更新版本
-
-1. 在 `scripts/` 目录中修改脚本源码
-2. 同步 SKILL.md 中 Scripts 章节的代码块（内容必须完全一致）
-3. 修改 `SKILL.md` 的 frontmatter `metadata.version`
-4. AI 下次激活时自动检测版本变化并安装新版脚本
+blue_server_handler/
+├── SKILL.md              # 唯一需要分发的文件（内含内嵌脚本代码块）
+├── README.md             # 本文件
+├── LICENSE
+├── .gitignore
+└── scripts/              # 脚本源码（与 SKILL.md 代码块保持一致）
+```
 
 ## License
 
