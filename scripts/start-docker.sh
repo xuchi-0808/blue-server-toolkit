@@ -1,5 +1,5 @@
 #!/bin/bash
-# blue_server_handler - Start Docker Container
+# blue_server_toolkit - Start Docker Container
 # Version: 0.9
 # Creates a Docker container with Ascend NPU device mappings and data mounts.
 #

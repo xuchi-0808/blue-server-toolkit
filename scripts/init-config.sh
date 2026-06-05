@@ -1,11 +1,11 @@
 #!/bin/bash
-# blue_server_handler - Initialize Configuration
+# blue_server_toolkit - Initialize Configuration
 # Version: 0.9
-# Creates ~/.blue_server_handler/ directory structure and a template config.
+# Creates ~/.blue_server_toolkit/ directory structure and a template config.
 #
 # Usage: bash init-config.sh
 
-CONFIG_DIR="$HOME/.blue_server_handler"
+CONFIG_DIR="$HOME/.blue_server_toolkit"
 CONFIG_FILE="$CONFIG_DIR/config.json"
 
 mkdir -p "$CONFIG_DIR"
