@@ -129,11 +129,9 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 | 容器日志 | `ssh {user}@{host} "docker logs {container}"` |
 
 ### 容器管理
+> 创建容器请使用 `start-docker.sh` 脚本（见脚本章节），通过 scp 传到服务器后执行。
 | 操作 | 命令 |
 |------|------|
-| 创建容器 | `ssh {user}@{host} "docker run -itd --name {container} --net=host --shm-size=128g --privileged=true -v /data:/data {image} bash -c 'sleep infinity'"` |
-
-> 以上是容器创建的参考参数。AI 可根据用户的服务器环境（磁盘挂载、内存大小等）灵活调整——例子仅供参考，不是固定模板。
 | 查看状态 | `ssh {user}@{host} "docker ps -a \| grep {container}"` |
 | 启动 | `ssh {user}@{host} "docker start {container}"` |
 | 交互式进入 | `ssh -t {user}@{host} "docker exec -it {container} bash"` |
