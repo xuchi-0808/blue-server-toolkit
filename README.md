@@ -100,7 +100,7 @@ blue_server_handler/
 ├── LICENSE
 ├── .gitignore
 ├── config.json           # 配置模板（完整字段，与 SKILL.md 保持一致）
-└── scripts/              # 脚本源码（与 SKILL.md 代码块保持一致）
+└── scripts_0_9/          # 脚本源码（与 SKILL.md 代码块保持一致）
 ```
 
 ## License
