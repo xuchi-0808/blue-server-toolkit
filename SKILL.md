@@ -98,7 +98,7 @@ Compare `config.json.version` with this SKILL.md's version:
 
 ## Configuration Management
 
-The full config schema is available in `config.example.json` (shipped with this
+The full config schema is available in `config.json` (shipped with this
 repo). Users can reference it to see all available fields.
 
 ### Reading Config
