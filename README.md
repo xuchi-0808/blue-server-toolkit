@@ -13,20 +13,30 @@
 
 ### 1. 安装
 
-将 `SKILL.md` 放到你的 AI 工具的 skills 目录：
+本 skill 只有一个文件：`SKILL.md`。把它放到你的 AI 工具的 skills 目录即可。
 
-| Tool | Skills Directory |
-|------|-----------------|
+**推荐方式：让 AI 帮你安装（无需手动找路径）**
+
+把这个 skill 的源码目录告诉 AI，AI 会帮你完成安装：
+
+> 我正在使用 Claude Code（或其他工具名），请阅读 `~/code/blue_server_handler/SKILL.md` 的内容，帮我把这个 skill 安装到正确的位置。安装完成后告诉我如何使用。
+
+把上面这段话中的路径改成你的实际路径，AI 就会：
+1. 读取 SKILL.md 了解技能内容
+2. 自动判断当前工具的技能目录位置
+3. 完成安装
+4. 引导你进行首次配置
+
+**备选：手动安装**
+
+| Tool | Skills 目录 |
+|------|-------------|
 | Claude Code | `~/.claude/skills/blue_server_handler/SKILL.md` |
-| TRAE | Check your AI tool's skills config path |
-| Other | Place `SKILL.md` where your tool loads skills |
+| OpenClaw | 查阅工具文档中 skills 配置路径 |
+| Codex CLI | 查阅工具文档中 skills 配置路径 |
+| 其他工具 | 将 `SKILL.md` 放到工具加载 skills 的目录 |
 
-如果目录不存在，手动创建即可：
-
-```bash
-mkdir -p ~/.claude/skills/blue_server_handler
-cp SKILL.md ~/.claude/skills/blue_server_handler/
-```
+手动安装时，把 `SKILL.md` 放进对应目录即可。首次激活后 AI 会自动完成后续设置。
 
 ### 2. 启动
 
@@ -99,10 +109,10 @@ cd blue_server_handler
 
 ### 更新版本
 
-1. 修改 `SKILL.md` 的 frontmatter `metadata.version`
-2. 更新 scripts 目录中的脚本
-3. 同步 SKILL.md 中 Scripts 章节的代码块
-4. AI 下次激活时自动检测版本变化并更新
+1. 在 `scripts/` 目录中修改脚本源码
+2. 同步 SKILL.md 中 Scripts 章节的代码块（内容必须完全一致）
+3. 修改 `SKILL.md` 的 frontmatter `metadata.version`
+4. AI 下次激活时自动检测版本变化并安装新版脚本
 
 ## License
 

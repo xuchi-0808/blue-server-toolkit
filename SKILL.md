@@ -410,7 +410,7 @@ fi
 To add a new script to this skill:
 
 1. Add the script to the `scripts/` directory in the repository
-2. Embed it as a code block in the "## Scripts" section above
+2. Embed it as a code block in the "## Scripts" section above (must be identical)
 3. Bump the version in frontmatter `metadata.version`
 
-The AI will extract new scripts on the next activation after version update.
+**Important**: Before release, verify that `scripts/` files and SKILL.md code blocks are identical. The AI extracts scripts from SKILL.md; `scripts/` is the development source of truth for verification.
