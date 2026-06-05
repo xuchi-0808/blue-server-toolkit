@@ -129,9 +129,9 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 | 容器日志 | `ssh {user}@{host} "docker logs {container}"` |
 
 ### 容器管理
-> 创建容器请使用 `start-docker.sh` 脚本（见脚本章节），通过 scp 传到服务器后执行。
 | 操作 | 命令 |
 |------|------|
+| 创建容器 | 见 `scripts/start-docker.sh`，scp 到服务器后执行 `bash ~/start-docker.sh {image_id} {name}` |
 | 查看状态 | `ssh {user}@{host} "docker ps -a \| grep {container}"` |
 | 启动 | `ssh {user}@{host} "docker start {container}"` |
 | 交互式进入 | `ssh -t {user}@{host} "docker exec -it {container} bash"` |
