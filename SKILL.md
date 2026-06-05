@@ -1,8 +1,10 @@
 ---
 name: blue-server-toolkit
 description: >-
-  操作远程开发服务器（蓝区服务器）时使用。提供 SSH 连接检查、代码同步、
-  UT 运行、模型下载、日志查看、容器管理等常见操作的模式参考和辅助脚本。
+  Use when operating remote development servers (blue-zone servers). Covers
+  connection checks, code sync, UT execution, model downloads, log viewing,
+  container management, and file sync.
+  触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
   version: 0.9
 ---
