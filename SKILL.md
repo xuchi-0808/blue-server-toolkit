@@ -38,12 +38,12 @@ When this skill is activated for the first time, follow these steps:
 
 ```bash
 VERSION="0.9"
-SCRIPTS_DIR="$HOME/.blue_server_handler/scripts_${VERSION}"
+SCRIPTS_DIR="$HOME/.blue_server_handler/scripts"
 
 # Check if already installed
 if [ ! -d "$SCRIPTS_DIR" ]; then
   # Clean up old versions
-  rm -rf "$HOME/.blue_server_handler"/scripts_*
+  rm -rf "$HOME/.blue_server_handler"/scripts
 
   # Create directory
   mkdir -p "$SCRIPTS_DIR"
@@ -91,7 +91,7 @@ Compare `config.json.version` with this SKILL.md's version:
 
 - **Same** -- continue normally
 - **Different** -- perform update:
-  1. Delete all `$HOME/.blue_server_handler/scripts_*` directories
+  1. Delete `$HOME/.blue_server_handler/scripts/`
   2. Extract new scripts from this SKILL.md
   3. Migrate config: keep user values, add any new fields, update version
   4. Notify user of the update
@@ -174,7 +174,7 @@ Check SSH reachability, Docker container status, and NPU device health.
 |-----------|---------|-------------|
 | SSH ping | `ssh -o ConnectTimeout=5 {user}@{host} "echo OK"` | Quick reachability check |
 | Container status | `ssh {user}@{host} "docker ps \| grep {container}"` | Check if container is running |
-| NPU status | `bash $HOME/.blue_server_handler/scripts_{version}/check-npu.sh {host} {user} {container}` | NPU device status |
+| NPU status | `bash $HOME/.blue_server_handler/scripts/check-npu.sh {host} {user} {container}` | NPU device status |
 | Disk space | `ssh {user}@{host} "df -h \| grep {user}"` | User directory disk usage |
 
 **Flow:**
@@ -348,13 +348,14 @@ When any operation fails, follow this chain automatically:
 ## Scripts
 
 These scripts are embedded in this SKILL.md. On first activation (or version
-update), the AI extracts them to `$HOME/.blue_server_handler/scripts_{version}/`.
+update), the AI extracts them to `$HOME/.blue_server_handler/scripts/`.
 
 ### check-npu.sh
 
 ```bash
 #!/bin/bash
 # blue_server_handler - NPU Status Check
+# Version: 0.9
 # Usage: bash check-npu.sh <host> <user> [container]
 
 HOST=$1
@@ -378,12 +379,13 @@ fi
 ```bash
 #!/bin/bash
 # blue_server_handler - Initialize Configuration
+# Version: 0.9
 # Usage: bash init-config.sh
 
 CONFIG_DIR="$HOME/.blue_server_handler"
 CONFIG_FILE="$CONFIG_DIR/config.json"
 
-mkdir -p "$CONFIG_DIR/scripts_${VERSION}"
+mkdir -p "$CONFIG_DIR"
 
 if [ ! -f "$CONFIG_FILE" ]; then
   cat > "$CONFIG_FILE" << 'EOF'
@@ -412,8 +414,8 @@ fi
 
 To add a new script to this skill:
 
-1. Add the script to the `scripts_0_9/` directory in the repository
+1. Add the script to the `scripts/` directory in the repository
 2. Embed it as a code block in the "## Scripts" section above (must be identical)
 3. Bump the version in frontmatter `metadata.version`
 
-**Important**: Before release, verify that `scripts_0_9/` files and SKILL.md code blocks are identical. The AI extracts scripts from SKILL.md; `scripts_0_9/` is the development source of truth for verification.
+**Important**: Before release, verify that `scripts/` files and SKILL.md code blocks are identical. The AI extracts scripts from SKILL.md; `scripts/` is the development source of truth for verification.
