@@ -8,7 +8,7 @@
 IMAGES_ID=$1
 NAME=$2
 if [ $# -ne 2 ]; then
-    echo "error: need one argument describing your container name."
+    echo "Usage: bash start-docker.sh <image_id> <container_name>"
     exit 1
 fi
 docker run --name ${NAME} -it -d --net=host --shm-size=500g \
