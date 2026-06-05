@@ -15,7 +15,7 @@
 
 #### 推荐方式：让 AI 帮你安装（无需手动找路径）
 
-把这个 skill 的源码目录告诉 AI，AI 会帮你完成安装，例如：
+建议先 clone 本仓，再让 AI 读取本地目录完成安装：
 
 ```text
 我正在使用 Claude Code（或其他工具名），请阅读 /home/xuchi/Documents/Code/AgentSkills/blue-server-handler/ 的内容，帮我把这个 skill 正确安装。安装完成后告诉我如何使用。
