@@ -18,7 +18,7 @@
 把这个 skill 的源码目录告诉 AI，AI 会帮你完成安装，例如：
 
 ```text
-我正在使用 Claude Code（或其他工具名），请阅读 /home/<user>/Documents/Code/AgentSkills/blue_server_handler/ 的内容，帮我把这个 skill 正确安装。安装完成后告诉我如何使用。
+我正在使用 Claude Code（或其他工具名），请阅读 /home/<user>/Documents/Code/AgentSkills/blue-server-handler/ 的内容，帮我把这个 skill 正确安装。安装完成后告诉我如何使用。
 ```
 
 把上面这段话中的路径改成你的实际路径，AI 就会：
@@ -31,7 +31,7 @@
 
 | Tool | Skills 目录 |
 |------|-------------|
-| Claude Code | `~/.claude/skills/blue_server_handler/SKILL.md` |
+| Claude Code | `~/.claude/skills/blue-server-handler/SKILL.md` |
 | OpenClaw | 查阅工具文档中 skills 配置路径 |
 | Codex CLI | 查阅工具文档中 skills 配置路径 |
 | 其他工具 | 将 `SKILL.md` 放到工具加载 skills 的目录 |
@@ -94,7 +94,7 @@ AI 会在首次激活时引导你完成配置。你随时可以直接告诉 AI �
 ### 目录结构
 
 ```
-blue_server_handler/
+blue-server-handler/
 ├── SKILL.md              # 唯一需要分发的文件（内含内嵌脚本代码块）
 ├── README.md             # 本文件
 ├── LICENSE
