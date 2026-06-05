@@ -31,6 +31,8 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 询问基本信息（host、user）并创建。`container` 字段可选。
 
 如果脚本还没安装，从下方 Scripts 章节提取到 `~/.blue_server_handler/scripts/`。
+如果 skill 源码仓在本地可用（用户已 clone），直接 cp 仓中的 `scripts/` 和
+`config.json` 到 `~/.blue_server_handler/` 更可靠。
 
 ## 配置说明
 
@@ -130,6 +132,8 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 | 操作 | 命令 |
 |------|------|
 | 创建容器 | `ssh {user}@{host} "docker run -itd --name {container} --net=host --shm-size=128g --privileged=true -v /data:/data {image} bash -c 'sleep infinity'"` |
+
+> 以上是容器创建的参考参数。AI 可根据用户的服务器环境（磁盘挂载、内存大小等）灵活调整——例子仅供参考，不是固定模板。
 | 查看状态 | `ssh {user}@{host} "docker ps -a \| grep {container}"` |
 | 启动 | `ssh {user}@{host} "docker start {container}"` |
 | 交互式进入 | `ssh -t {user}@{host} "docker exec -it {container} bash"` |
