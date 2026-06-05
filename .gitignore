@@ -8,8 +8,9 @@ Thumbs.db
 *.swp
 *.swo
 
-# Config (contains real server info)
-config.json
+# User config (real server info, NOT the template)
+# The repo's config.json is a template with placeholder values
+config.local.json
 
 # Logs
 *.log
