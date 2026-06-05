@@ -1,0 +1,109 @@
+# Blue Server Handler
+
+一套通用 AI skill，用于操作远程开发服务器（蓝区服务器）。覆盖 80% 日常高频操作：连接检查、代码同步、UT 运行、模型下载、日志查看、容器管理、文件传输。
+
+## Features
+
+- **不绑定机器**——所有服务器信息通过配置文件管理，改配置就能换服务器
+- **不绑定 AI 工具**——纯 Markdown + bash 脚本，Claude Code、TRAE 等任何 AI 工具都能用
+- **Prompt 为主 + 脚本为辅**——AI 处理灵活场景，脚本覆盖高频操作
+- **自安装**——SKILL.md 在首次激活时自动完成安装和配置引导
+
+## Quick Start
+
+### 1. 安装
+
+将 `SKILL.md` 放到你的 AI 工具的 skills 目录：
+
+| Tool | Skills Directory |
+|------|-----------------|
+| Claude Code | `~/.claude/skills/blue_server_handler/SKILL.md` |
+| TRAE | Check your AI tool's skills config path |
+| Other | Place `SKILL.md` where your tool loads skills |
+
+如果目录不存在，手动创建即可：
+
+```bash
+mkdir -p ~/.claude/skills/blue_server_handler
+cp SKILL.md ~/.claude/skills/blue_server_handler/
+```
+
+### 2. 启动
+
+打开你的 AI 工具，激活这个 skill。AI 会自动：
+
+1. 检查并安装辅助脚本到 `~/.blue_server_handler/`
+2. 引导你填写服务器信息
+3. 配置完成，开始使用
+
+### 3. 使用示例
+
+```
+你：检查一下服务器的 NPU 状态
+AI：好的，请告诉我你的服务器信息（IP、用户名、容器名）？
+你：IP 是 192.168.1.100，用户名 dev，容器 dev_container
+AI：已记录。正在检查...
+     ✅ SSH 可达
+     ✅ 容器运行中
+     ✅ NPU 状态正常（8 芯片在线）
+```
+
+```
+你：帮我拉一下 main 分支的最新代码
+AI：好的，在哪个目录下操作？
+你：/home/dev/Tasks/A00272/MindIE-LLM
+AI：正在拉取...
+     当前分支：main
+     最新 commit：abc1234 fix: ...
+     工作区干净 ✅
+```
+
+## Configuration
+
+配置文件位置：`~/.blue_server_handler/config.json`
+
+AI 会在首次激活时引导你完成配置。你随时可以直接告诉 AI 修改配置：
+
+- "帮我加一台新服务器 S2"
+- "S1 的 IP 改成了 10.0.0.5"
+- "把默认服务器改成 S2"
+
+详细配置字段说明见 [SKILL.md](SKILL.md) 的 Configuration Management 章节。
+
+## Scripts
+
+辅助脚本首次激活时自动安装到 `~/.blue_server_handler/scripts_{version}/`：
+
+| Script | Description |
+|--------|-------------|
+| `check-npu.sh` | 远程 NPU 状态检查 |
+| `init-config.sh` | 配置模板初始化 |
+
+## Development
+
+```bash
+# Clone
+git clone <repo-url>
+cd blue_server_handler
+
+# Directory structure
+# blue_server_handler/
+# ├── SKILL.md              # 主 skill 文件
+# ├── README.md             # 本文件
+# ├── LICENSE
+# ├── .gitignore
+# └── scripts/              # 脚本源码
+#     ├── init-config.sh
+#     └── check-npu.sh
+```
+
+### 更新版本
+
+1. 修改 `SKILL.md` 的 frontmatter `metadata.version`
+2. 更新 scripts 目录中的脚本
+3. 同步 SKILL.md 中 Scripts 章节的代码块
+4. AI 下次激活时自动检测版本变化并更新
+
+## License
+
+MIT
