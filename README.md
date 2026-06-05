@@ -99,6 +99,7 @@ blue_server_handler/
 ├── README.md             # 本文件
 ├── LICENSE
 ├── .gitignore
+├── config.example.json   # 配置模板（完整字段参考）
 └── scripts/              # 脚本源码（与 SKILL.md 代码块保持一致）
 ```
 
