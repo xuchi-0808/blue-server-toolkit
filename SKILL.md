@@ -30,6 +30,25 @@ is not bound to specific machines or agents.
 5. **Ask when unsure** -- when config is ambiguous, multiple servers match,
    or a value looks suspicious, always confirm with the user before acting
 
+### Container Paradigm
+
+Some servers run operations inside Docker containers. The pattern is:
+
+```
+ssh {user}@{host} "docker exec {container} bash -c '{command}'"
+```
+
+**Rules for using containers:**
+- If `config.json` has `container` set and the user's task benefits from it
+  (e.g., running code, tests), offer to use the container
+- If `container` is not set, run everything on the bare metal via SSH
+- User can override any time: "run this inside the container" / "don't use
+  the container for this"
+- For operations that are clearly OS-level (disk, NPU, logs), container is
+  unnecessary unless the command itself only exists inside the container
+- Container Management (skill 6) is the only skill that inherently requires
+  container involvement
+
 ## First Activation
 
 When this skill is activated for the first time, follow these steps:
@@ -66,9 +85,9 @@ with a `version` field matching this SKILL.md's version.
 |-------|-----|----------|
 | `servers[].host` | "What's the server IP or domain?" | Yes |
 | `servers[].user` | "What's your SSH username?" | Yes |
-| `servers[].container` | "What's the Docker container name?" | Yes |
 | `servers[].alias` | "What alias should I use for this server?" (default: s1) | No |
 | `servers[].port` | (default: 22) | No |
+| `servers[].container` | (Docker container name, if operations run inside it) | No |
 | `servers[].desc` | (optional description) | No |
 | `default_server` | "Which server should I use by default?" | No |
 
@@ -168,18 +187,19 @@ restrictions unless the user asks about safety features.
 
 ### 1. Connection Check
 
-Check SSH reachability, Docker container status, and NPU device health.
+Check SSH reachability and server health. If a container is configured, also
+check its status; otherwise skip container-specific checks.
 
 | Operation | Command | Description |
 |-----------|---------|-------------|
 | SSH ping | `ssh -o ConnectTimeout=5 {user}@{host} "echo OK"` | Quick reachability check |
-| Container status | `ssh {user}@{host} "docker ps \| grep {container}"` | Check if container is running |
-| NPU status | `bash $HOME/.blue_server_handler/scripts/check-npu.sh {host} {user} {container}` | NPU device status |
+| Container status | `ssh {user}@{host} "docker ps \| grep {container}"` | (if container configured) |
+| NPU status | `bash $HOME/.blue_server_handler/scripts/check-npu.sh {host} {user} [{container}]` | Optional container |
 | Disk space | `ssh {user}@{host} "df -h \| grep {user}"` | User directory disk usage |
 
 **Flow:**
 1. User asks to check server → determine target from config or ask
-2. Run: SSH ping → container check → NPU check
+2. Run: SSH ping → (if container configured) container check → NPU check
 3. Summarize results, flag anomalies
 4. Multiple servers and no target specified → ask which one
 
@@ -212,25 +232,31 @@ Git operations on the remote server: clone, pull, branch switch, status.
 
 ### 3. UT Execution
 
-Run unit tests inside the server's Docker container.
+Run unit tests on the server. By default, execute directly via SSH. If the
+user wants to run inside a container, wrap the command:
+
+```
+ssh {user}@{host} "docker exec {container} bash -c '{command}'"
+```
 
 | Operation | Command | Description |
 |-----------|---------|-------------|
-| Single file | `ssh {user}@{host} "docker exec {container} bash -c 'cd {repo_dir} && python3 -m pytest {test_file} -v'"` | One test file |
-| Batch | `ssh {user}@{host} "docker exec {container} bash -c 'cd {repo_dir} && python3 -m pytest {file1} {file2} -v'"` | Multiple files |
-| With coverage | `ssh {user}@{host} "docker exec {container} bash -c 'cd {repo_dir} && coverage run -m pytest {test_file} -v && coverage report -m'"` | Coverage report |
-| By directory | `ssh {user}@{host} "docker exec {container} bash -c 'cd {repo_dir} && python3 -m pytest tests/{subdir}/ -v'"` | Directory |
+| Single file | `ssh {user}@{host} "cd {repo_dir} && python3 -m pytest {test_file} -v"` | One test file |
+| Batch | `ssh {user}@{host} "cd {repo_dir} && python3 -m pytest {file1} {file2} -v"` | Multiple files |
+| With coverage | `ssh {user}@{host} "cd {repo_dir} && coverage run -m pytest {test_file} -v && coverage report -m"` | Coverage report |
+| By directory | `ssh {user}@{host} "cd {repo_dir} && python3 -m pytest tests/{subdir}/ -v"` | Directory |
 
 **Flow:**
 1. User asks to run tests → confirm files / directory / coverage option
-2. Construct and execute command via docker exec
-3. Report: passed / failed / skip counts
-4. On failure → extract error details, suggest next steps
+2. Check if container is configured: if yes, offer "run inside container?"
+3. Construct and execute command
+4. Report: passed / failed / skip counts
+5. On failure → extract error details, suggest next steps
 
 **Common issues:**
-- Missing dependency → suggest pip install inside container
+- Missing dependency → suggest pip install
 - Wrong python path → try `python` vs `python3`
-- Container not running → start container first
+- If in container and container not running → start container first
 
 ### 4. Model Download
 
@@ -238,7 +264,7 @@ Download model weights via ModelScope CLI on the server.
 
 | Operation | Command | Description |
 |-----------|---------|-------------|
-| Download | `ssh {user}@{host} "docker exec {container} bash -c 'cd {weights_root} && nohup modelscope download {model_id} >> download.log 2>&1 &'"` | Background download |
+| Download | `ssh {user}@{host} "cd {weights_root} && nohup modelscope download {model_id} >> download.log 2>&1 &"` | Background download |
 | Check progress | `ssh {user}@{host} "tail -f {weights_root}/download.log"` | Live log tail |
 | Check disk | `ssh {user}@{host} "df -h {weights_root}"` | Space check before download |
 | Verify | `ssh {user}@{host} "du -sh {weights_root}/{model_name}"` | Confirm download complete |
@@ -265,26 +291,25 @@ Download model weights via ModelScope CLI on the server.
 
 ### 5. Log Viewing
 
-View container logs and task output files with grep filtering.
+View log files on the server with grep filtering. Container logs are available
+if a container is configured.
 
 | Operation | Command | Description |
 |-----------|---------|-------------|
-| Container logs | `ssh {user}@{host} "docker logs {container} {--tail N}"` | Container stdout/stderr |
-| Tail file | `ssh {user}@{host} "tail -f {log_file}"` | Live file follow |
-| Search keyword | `ssh {user}@{host} "grep -n {keyword} {log_file}"` | Find matching lines |
-| Read file | `ssh {user}@{host} "cat {log_file}"` | Full file content |
-| Last N lines | `ssh {user}@{host} "tail -n 100 {log_file}"` | Tail only |
+| View file | `ssh {user}@{host} "cat {log_file}"` | Full file content |
+| Tail last N | `ssh {user}@{host} "tail -n 100 {log_file}"` | Last N lines |
+| Tail follow | `ssh {user}@{host} "tail -f {log_file}"` | Live follow |
+| Search keyword | `ssh {user}@{host} "grep -n {keyword} {log_file}"` | grep matching lines |
+| Container logs | `ssh {user}@{host} "docker logs {container} {--tail N}"` | (if container configured) |
 
 **Flow:**
-1. User asks about logs → clarify: container logs or file logs?
-2. Execute and retrieve content
-3. If output is large, filter with grep or suggest keyword
-4. Summarize anomalies / errors
+1. User asks about logs → clarify: which file? what kind of logs?
+2. If output is large, filter with grep or limit lines
+3. Summarize anomalies / errors
 
 **Common issues:**
 - Log file path unknown → ask user or search common locations
 - Log too large → limit lines, suggest keyword filter
-- Empty container logs → check if container has output
 
 ### 6. Container Management
 
@@ -397,8 +422,8 @@ if [ ! -f "$CONFIG_FILE" ]; then
       "host": "__your_host__",
       "user": "__your_user__",
       "port": 22,
-      "container": "__your_container__",
-      "desc": "Main dev server"
+      "container": null,
+      "desc": "主开发服务器"
     }
   ],
   "default_server": "s1"
