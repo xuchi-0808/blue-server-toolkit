@@ -1,5 +1,6 @@
 #!/bin/bash
 # blue_server_handler - Initialize Configuration
+# Version: 0.9
 # Creates ~/.blue_server_handler/ directory structure and a template config.
 #
 # Usage: bash init-config.sh
@@ -7,7 +8,7 @@
 CONFIG_DIR="$HOME/.blue_server_handler"
 CONFIG_FILE="$CONFIG_DIR/config.json"
 
-mkdir -p "$CONFIG_DIR/scripts"
+mkdir -p "$CONFIG_DIR"
 
 if [ ! -f "$CONFIG_FILE" ]; then
   cat > "$CONFIG_FILE" << 'EOF'
