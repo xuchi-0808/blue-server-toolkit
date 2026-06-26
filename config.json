@@ -1,5 +1,5 @@
 {
-  "version": "0.9",
+  "version": "1.0",
   "servers": [
     {
       "alias": "s1",
@@ -12,23 +12,12 @@
   ],
   "default_server": "s1",
   "workspaces": {
-    "task_root": "/home/__your_user__/Tasks",
-    "weights_root": "/home/__your_user__/weights",
-    "code_root": "/home/__your_user__/Code"
+    "task_root": "/home/developer/Tasks",
+    "weights_root": "/home/developer/weights",
+    "code_root": "/home/developer/Code"
   },
   "restrictions": {
-    "forbidden_commands": [
-      "sudo rm -rf /",
-      "reboot",
-      "shutdown",
-      "init 0",
-      "init 6"
-    ],
-    "confirm_required": [
-      "rm -rf",
-      "docker rm",
-      "docker rmi",
-      "kill -9"
-    ]
+    "forbidden_commands": ["sudo rm -rf /", "reboot", "pkill -9 -f python"],
+    "confirm_required": ["rm -rf", "docker rm", "docker stop", "kill -9", "npu-smi set -t reset"]
   }
 }

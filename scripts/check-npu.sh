@@ -1,6 +1,6 @@
 #!/bin/bash
 # blue_server_toolkit - NPU Status Check
-# Version: 0.9
+# Version: 1.0
 # Runs npu-smi info on the target server via SSH (optionally inside a container).
 #
 # Usage: bash check-npu.sh <host> <user> [container]

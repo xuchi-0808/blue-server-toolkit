@@ -1,4 +1,4 @@
-# Blue Server Toolkit v0.9
+# Blue Server Toolkit v1.0
 
 一套通用 AI skill，用于操作远程开发服务器（蓝区服务器）。覆盖 80% 日常高频操作：连接检查、代码同步、UT 运行、模型下载、日志查看、容器管理、文件传输。
 
@@ -91,15 +91,18 @@ AI 会在首次激活时引导你完成配置。你随时可以直接告诉 AI �
 
 详细配置字段说明见 [SKILL.md](SKILL.md) 的配置说明章节。
 
-## Scripts
+## Scripts & Docs
 
-辅助脚本首次激活时自动安装到 `~/.blue_server_toolkit/scripts/`：
+辅助脚本和参考文档首次激活时自动安装到 `~/.blue_server_toolkit/`：
 
-| Script | Description |
-|--------|-------------|
-| `check-npu.sh` | 远程 NPU 状态检查 |
-| `init-config.sh` | 配置模板初始化 |
-| `start-docker.sh` | 创建 Docker 容器（含 NPU 设备映射） |
+| Item | Description |
+|------|-------------|
+| `scripts/check-npu.sh` | 远程 NPU 状态检查 |
+| `scripts/init-config.sh` | 配置模板初始化 |
+| `scripts/start-docker-A2.sh` | A2 机型创建 Docker 容器 |
+| `scripts/start-docker-A3.sh` | A3 机型创建 Docker 容器 |
+| `scripts/start-docker-A5.sh` | A5 机型创建 Docker 容器 |
+| `docs/*.md` | 参考文档（NPU 进程清理、A3 芯片编号、Graph 调试等） |
 
 ## Development
 
@@ -107,12 +110,25 @@ AI 会在首次激活时引导你完成配置。你随时可以直接告诉 AI �
 
 ```
 blue-server-toolkit/
-├── SKILL.md              # 唯一需要分发的文件（内含内嵌脚本代码块）
+├── SKILL.md              # 核心 skill 文件（唯一需要分发的文件）
 ├── README.md             # 本文件
-├── LICENSE
-├── .gitignore
-├── config.json           # 配置模板（完整字段，与 SKILL.md 保持一致）
-└── scripts/              # 脚本源码（与 SKILL.md 代码块保持一致）
+├── CLAUDE.md             # 开发约定
+├── LICENSE               # MIT
+├── config.json           # 配置模板
+├── scripts/              # 辅助脚本
+│   ├── check-npu.sh      # NPU 状态检查
+│   ├── init-config.sh    # 配置初始化
+│   ├── start-docker-A2.sh
+│   ├── start-docker-A3.sh
+│   └── start-docker-A5.sh
+└── docs/                 # 参考文档
+    ├── a3-chip-numbering.md
+    ├── graph-debugging.md
+    ├── hdk-installation.md
+    ├── mindie-compile.md
+    ├── npu-process-cleanup.md
+    ├── server-configs.md
+    └── vllm-service-guide.md
 ```
 
 ## License
