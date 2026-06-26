@@ -4,24 +4,29 @@
 
 ```
 blue-server-toolkit/
-├── SKILL.md              # 唯一需要分发的文件（双源之一）
+├── SKILL.md              # 核心 skill 文件（唯一需要分发的文件）
 ├── README.md             # 分发文档
 ├── CLAUDE.md             # 本文件
 ├── LICENSE               # MIT
 ├── .gitignore
-├── config.json           # 配置模板（双源之一）
-└── scripts/              # 脚本源码（双源之一，与 SKILL.md 代码块一致）
-    ├── check-npu.sh      # NPU 状态检查
-    ├── init-config.sh    # 配置初始化
-    └── start-docker.sh   # 创建容器
+├── config.json           # 配置模板
+├── scripts/              # 辅助脚本
+│   ├── check-npu.sh      # NPU 状态检查
+│   ├── init-config.sh    # 配置初始化
+│   ├── start-docker-A2.sh
+│   ├── start-docker-A3.sh
+│   └── start-docker-A5.sh
+└── docs/                 # 参考文档
+    ├── a3-chip-numbering.md
+    ├── graph-debugging.md
+    ├── hdk-installation.md
+    ├── mindie-compile.md
+    ├── npu-process-cleanup.md
+    ├── server-configs.md
+    └── vllm-service-guide.md
 ```
 
 ## 开发约定
-
-### 双源一致性
-
-`scripts/` 和 `config.json` 必须与 `SKILL.md` 中对应的代码块完全一致。
-修改脚本时同步更新 SKILL.md 的 Scripts 章节。
 
 ### 版本号
 
@@ -40,7 +45,6 @@ blue-server-toolkit/
 
 ### 发布流程
 
-1. 确保 scripts/ 和 SKILL.md 代码块一致
-2. 更新版本号
-3. 合并到 main
-4. 打 tag 并 push
+1. 更新版本号
+2. 合并到 main
+3. 打 tag 并 push
