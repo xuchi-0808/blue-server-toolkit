@@ -4,8 +4,8 @@ description: >-
   Use when operating remote development servers (Ascend NPU blue-zone servers).
   Covers connection checks, code sync, UT execution, model downloads, log viewing,
   container management, and file sync. For advanced topics (NPU process cleanup,
-  A3 chip numbering, vLLM service management, Graph debugging, HDK installation,
-  MindIE compilation), see docs/ directory.
+  A3 chip numbering, vLLM service management, Graph debugging, HDK installation),
+  see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
   version: 1.0
@@ -107,6 +107,9 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   不要 `cat` 全量日志（会撑爆 AI 上下文窗口）
 - **存储布局**：`/root` 分区通常较小，大文件放 `/home`；
   模型缓存可通过软链迁移：`ln -s /home/.cache-root ~/.cache`
+- **容器创建前确认**：执行容器相关操作前，如果上下文中没有明确的镜像 ID
+  和容器名，需要向用户询问使用什么镜像、容器名起成什么样。如果用户回复
+  "你自己看着办"之类的授权，AI 可自行决定
 
 ## 命令参考
 
@@ -214,14 +217,6 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 
 > 触发场景：新服务器初始化、npu-smi 不可用、驱动/固件安装
 > 详见 `~/.blue_server_toolkit/docs/hdk-installation.md`
-
-### MindIE-LLM 编译
-
-从源码编译 .whl 包：`bash build.sh 3rd` → 设环境变量 → `pip wheel .` → 安装。
-快速迭代：删除旧 .whl 和 build 目录后重新编译 + `--force-reinstall`。
-
-> 触发场景：MindIE-LLM 源码编译、ATB_Models 安装
-> 详见 `~/.blue_server_toolkit/docs/mindie-compile.md`
 
 ### 服务器配置与存储
 
