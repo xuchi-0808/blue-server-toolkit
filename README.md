@@ -110,9 +110,8 @@ AI 会在首次激活时引导你完成配置。你随时可以直接告诉 AI �
 
 ```
 blue-server-toolkit/
-├── SKILL.md              # 核心 skill 文件（唯一需要分发的文件）
+├── SKILL.md              # 核心 skill 文件（AI 入口）
 ├── README.md             # 本文件
-├── CLAUDE.md             # 开发约定
 ├── LICENSE               # MIT
 ├── config.json           # 配置模板
 ├── scripts/              # 辅助脚本
@@ -125,7 +124,6 @@ blue-server-toolkit/
     ├── a3-chip-numbering.md
     ├── graph-debugging.md
     ├── hdk-installation.md
-    ├── mindie-compile.md
     ├── npu-process-cleanup.md
     ├── server-configs.md
     └── vllm-service-guide.md
