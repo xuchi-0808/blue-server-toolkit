@@ -54,7 +54,7 @@
 - **HDK**: 驱动 26.0.RC1 + 固件 9.0.0.0.205，已安装（2026-06-20）
 - **状态**: 已装 HDK + Docker + CANN（2026-06-20）
 - **A00282 验证状态**: S3-S4 双机跨机 MC2 通信失败（197-198 间是普通 100GbE，非 RoCE）
-- **安装记录**: 见 [HDK-裸机安装指南](./hdk-installation.md)
+- **安装记录**: 见 [HDK-裸机安装指南](hdk-installation.md)
 
 ## 硬件规格
 
@@ -127,7 +127,7 @@
 - 踩坑：裸机缺 `tar` 导致 `.run` 解压报 `Decompression failed / Signal caught`（报错不提 tar，极隐蔽）
 - 踩坑：缺 `HwHiAiUser` 用户（ERR 0x0091）、缺匹配版 `kernel-devel`
 - 补齐基础工具（tar/vim/git/cmake/numactl/tmux/jq/htop 等一批）
-- 详细流程见 [HDK-裸机安装指南](./hdk-installation.md)
+- 详细流程见 [HDK-裸机安装指南](hdk-installation.md)
 
 ---
 
