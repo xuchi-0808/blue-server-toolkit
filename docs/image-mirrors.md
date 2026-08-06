@@ -63,3 +63,29 @@ systemctl daemon-reload && systemctl restart docker
 curl -sI -m 8 https://quay.nju.edu.cn/
 curl -s -m 10 https://quay.nju.edu.cn/v2/ascend/vllm-ascend/tags/list | head -c 500
 ```
+
+### 4. 不重启 daemon 的稳妥路径：ctr 直连拉取 + docker load
+
+docker daemon 配了 systemd 代理、又不想重启 dockerd（共享机器上有运行容器）时，
+可用 `ctr` 直连镜像源（containerd 不走 daemon 代理），导出 tar 后 `docker load` 导入。
+2026-08-06 在 197（ctr 1.4.9）实测：南大源直连 ~94MB/s，全程不影响 29 个运行容器。
+
+```bash
+# 1. 临时命名空间拉取（arm64 与 A3 匹配）
+ctr ns create blue-pull
+ctr -n blue-pull images pull --platform linux/arm64 \
+    quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3
+
+# 2. 导出 OCI tar（含 Docker manifest，docker load 可读）
+ctr -n blue-pull images export --platform linux/arm64 \
+    /tmp/vllm-nightly-main-a3.tar quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3
+
+# 3. 导入 docker 并重打官方 tag
+docker load -i /tmp/vllm-nightly-main-a3.tar
+docker tag quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3 \
+    quay.io/ascend/vllm-ascend:nightly-main-a3
+
+# 4. 清理（命名空间可能因共享 blob 无法删除，可保留，不影响使用）
+ctr -n blue-pull images rm quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3
+rm -f /tmp/vllm-nightly-main-a3.tar
+```
