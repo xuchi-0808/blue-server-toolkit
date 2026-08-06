@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.2
+  version: 1.3
 ---
 
 # Blue Server Toolkit
@@ -284,6 +284,29 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 | start-docker-A2.sh | 创建 A2 容器（8 NPU 单芯） | scp 到服务器后 `bash start-docker-A2.sh <image_id> <name>` |
 | start-docker-A3.sh | 创建 A3 容器（16 chip 单卡双芯） | scp 到服务器后 `bash start-docker-A3.sh <image_id> <name>` |
 | start-docker-A5.sh | 创建 A5 容器（Ascend 950） | scp 到服务器后 `bash start-docker-A5.sh <image_id> <name>` |
+
+## 维护与同步
+
+本 skill 在电脑上有 4 处安装 + 1 个运行时目录，**更新时必须全部同步**：
+
+| 位置 | 路径 | 类型 |
+|------|------|------|
+| 源码 git 仓 | `~/Documents/Code/AgentSkills/blue-server-toolkit` | 源头；commit 带 `-s`，不主动 push |
+| Claude Code | `~/.claude/skills/blue-server-toolkit` | 软链到源码仓，自动同步 |
+| Codex | `~/.codex/skills/blue-server-toolkit` | 副本，rsync 同步 |
+| OpenCode | `~/.config/opencode/skills/blue-server-toolkit` | 副本，rsync 同步 |
+| 运行时目录 | `~/.blue_server_toolkit/{scripts,docs}` | 首次激活安装的脚本/文档 |
+
+同步命令：
+
+```bash
+SRC="$HOME/Documents/Code/AgentSkills/blue-server-toolkit"
+rsync -a --exclude '.git' --exclude '.DS_Store' "$SRC/" "$HOME/.codex/skills/blue-server-toolkit/"
+rsync -a --exclude '.git' --exclude '.DS_Store' "$SRC/" "$HOME/.config/opencode/skills/blue-server-toolkit/"
+cp "$SRC"/docs/*.md "$HOME/.blue_server_toolkit/docs/"
+```
+
+**维护原则**：使用蓝区服务器时，遇到 skill 未覆盖的新情况、合作总结出新经验后，主动写回源码仓并同步所有位置；新增文档同时在「进阶指南」加索引条目，并 bump frontmatter 的 version。
 
 ## 扩展
 
