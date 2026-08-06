@@ -127,7 +127,10 @@ blue-server-toolkit/
     ├── image-mirrors.md
     ├── npu-process-cleanup.md
     ├── server-configs.md
-    └── vllm-service-guide.md
+    ├── vllm-service-guide.md
+    └── site-notes/          # 非泛用环境备忘
+        ├── README.md
+        └── blue-zone-resources.md
 ```
 
 ## License

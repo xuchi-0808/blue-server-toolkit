@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.4
+  version: 1.5
 ---
 
 # Blue Server Toolkit
@@ -256,6 +256,12 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 
 > 触发场景：docker pull 慢/失败、蓝区拉镜像、镜像源切换
 > 详见 `~/.blue_server_toolkit/docs/image-mirrors.md`
+
+### 站点资源备忘（非泛用）
+
+> 触发场景：查询蓝区/内网共享盘、权重路径、机器资源清单
+> 约定与模板：`~/.blue_server_toolkit/docs/site-notes/README.md`
+> 示例：`~/.blue_server_toolkit/docs/site-notes/blue-zone-resources.md`
 
 ## 安全限制
 
