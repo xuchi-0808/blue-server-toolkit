@@ -32,7 +32,7 @@ npu-smi info  # 进程表在底部
 kill -9 <PID>
 ```
 
-> **禁止 `pkill -9 -f python`** — 会误伤其他用户进程并导致 HBM 孤儿。详见 [npu-process-cleanup.md](./npu-process-cleanup.md)。
+> **禁止 `pkill -9 -f python`** — 会误伤其他用户进程并导致 HBM 孤儿。详见 [npu-process-cleanup.md](npu-process-cleanup.md)。
 
 ## 多服务并行
 
