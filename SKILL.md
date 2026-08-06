@@ -291,7 +291,7 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 
 | 位置 | 路径 | 类型 |
 |------|------|------|
-| 源码 git 仓 | `~/Documents/Code/AgentSkills/blue-server-toolkit` | 唯一源头；commit 带 `-s`，不主动 push |
+| 源码 git 仓 | `~/Documents/Code/AgentSkills/blue-server-toolkit` | 唯一源头；commit 带 `-s`；push 等用户指令（本仓偏好高频迭代） |
 | Claude Code | `~/.claude/skills/blue-server-toolkit` | 软链 → 源码仓 |
 | Codex | `~/.codex/skills/blue-server-toolkit` | 软链 → 源码仓 |
 | OpenCode | `~/.config/opencode/skills/blue-server-toolkit` | 软链 → 源码仓 |
