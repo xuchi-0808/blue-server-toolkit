@@ -3,6 +3,7 @@
 # Version: 1.0
 # 用法: bash start-docker-A3.sh <image_id> <container_name>
 # A3: 8 NPU = 16 chips（单卡双芯），davinci0-15
+# 注意: 共享机器上按需缩减 davinci 设备，只映射需要的 chip（默认映射全部 16 chip）
 
 IMAGES_ID=$1
 NAME=$2
