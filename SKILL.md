@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.0
+  version: 1.2
 ---
 
 # Blue Server Toolkit
@@ -110,6 +110,12 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
 - **容器创建前确认**：执行容器相关操作前，如果上下文中没有明确的镜像 ID
   和容器名，需要向用户询问使用什么镜像、容器名起成什么样。如果用户回复
   "你自己看着办"之类的授权，AI 可自行决定
+- **蓝区代理穿透**：蓝区服务器无法直接访问外网 PyPI/docker 等。标准做法
+  是用 SSH 反向端口转发，把本地代理（如端口 7897）映射到远端：
+  `ssh -R 7897:127.0.0.1:7897 {user}@{host} -f -N`
+  建好后在容器内设 `HTTP_PROXY=http://127.0.0.1:7897` 即可走本地代理出网。
+  隧道易超时断开，操作前先检查远端端口是否在监听（`ss -tlnp | grep 7897`），
+  发现断了就重建。此方式仅适用于用户本地代理正在运行且能访问目标源。
 
 ## 命令参考
 
@@ -169,6 +175,26 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
 | 下载 | `scp {user}@{host}:{remote_path} {local_path}` |
 | 增量同步 | `rsync -avz {local_dir} {user}@{host}:{remote_dir}` |
 
+## 常用镜像源
+
+vllm-ascend 镜像常用来源（拉大镜像时优先直连/内网源，**禁止**把大流量导到付费外网代理）：
+
+| 源 | 地址 | 说明 |
+|----|------|------|
+| 官方 | `quay.io/ascend/vllm-ascend` | 海外源，蓝区直连很慢（实测 ~0.2MB/s） |
+| 南大镜像 | `quay.nju.edu.cn/ascend/vllm-ascend` | 国内镜像，蓝区直连实测 ~18MB/s，推荐 |
+| 华为内网 | `cr.rnd.huawei.com/images/vllm-ascend` | 同事反馈最快；需 rnd 内网 DNS/路由，蓝区当前 VPN 不可达 |
+
+```bash
+# 南大镜像拉取 + 重打官方 tag
+docker pull quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3
+docker tag quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3 quay.io/ascend/vllm-ascend:nightly-main-a3
+```
+
+> 踩坑：docker daemon 若配了 systemd 代理（`/etc/systemd/system/docker.service.d/proxy.conf`），
+> 所有 registry 请求都会走代理；改用直连内网源时需要临时调整 NO_PROXY 并重启 dockerd
+> （`live-restore=true` 时容器不中断）。详见 `docs/image-mirrors.md`。
+
 ## 进阶指南
 
 以下内容需要查阅 `docs/` 目录中的专项文档。每个条目包含触发条件和核心规则，
@@ -225,6 +251,11 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 
 > 触发场景：磁盘空间不足、权重路径查询、新服务器入册
 > 详见 `~/.blue_server_toolkit/docs/server-configs.md`
+
+### 镜像源与拉取
+
+> 触发场景：docker pull 慢/失败、蓝区拉镜像、镜像源切换
+> 详见 `~/.blue_server_toolkit/docs/image-mirrors.md`
 
 ## 安全限制
 
