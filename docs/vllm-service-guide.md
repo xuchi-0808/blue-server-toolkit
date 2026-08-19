@@ -12,6 +12,8 @@ docker exec -d <container> bash -c 'bash /path/to/start_script.sh > /path/to/log
 nohup ssh root@<host> "docker exec -d <container> bash -c 'bash /path/to/start_script.sh > /path/to/log 2>&1'" > /dev/null 2>&1 &
 ```
 
+> **cwd 不要在 vllm 代码仓内拉起服务**——仓目录与 pip 包重名冲突，会 import 到仓内代码而非已装版本；换其它路径执行。
+
 ## 检查服务状态
 
 ```bash
