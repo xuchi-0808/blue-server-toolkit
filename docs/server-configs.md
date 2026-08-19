@@ -8,6 +8,9 @@
 | 2 | 173.125.1.2 | 昇腾蓝区次服务器 | 已配置（`/` 92%，Python 坏，已放弃）|
 | 3 | 192.168.13.197 | A3-S3（vLLM 测试） | A00282 E4 单机不复现 + 双机非 RoCE |
 | 4 | 192.168.13.198 | A3-S4（Atlas 800I A3） | 已装 HDK+Docker+CANN |
+| 5-8 | 192.168.13.153/.154/.155/.156 | A3-S5~S8 | 已在 config.json 注册（详略） |
+| 9 | 192.168.13.162 | A3-S9（共享机） | 2026-08-19 入册，NPU 空闲，`/` 79% 紧张 |
+| 10 | 192.168.13.165 | A3-S10（共享机） | 2026-08-19 入册，chip 0-3 被占 ~59G |
 
 ## 基础信息
 
@@ -55,6 +58,28 @@
 - **状态**: 已装 HDK + Docker + CANN（2026-06-20）
 - **A00282 验证状态**: S3-S4 双机跨机 MC2 通信失败（197-198 间是普通 100GbE，非 RoCE）
 - **安装记录**: 见 [HDK-裸机安装指南](hdk-installation.md)
+
+### S9: 192.168.13.162（2026-08-19 入册）
+
+- **IP**: `192.168.13.162`
+- **型号**: Atlas 800I A3（8 NPU = 16 chips × Ascend 910，每 chip 64GB HBM，npu-smi 26.0.rc1）
+- **OS**: openEuler 22.03 LTS-SP4, aarch64
+- **Hostname**: ipb21b04a2
+- **SSH 登录**: `root@192.168.13.162`（免密已配，2026-08-19）
+- **磁盘**: `/` 69G（79% 用，仅 14G 余，紧张）；`/home` 3.4T（5% 用，3.1T 可用）→ **大文件一律放 /home**
+- **共享情况**: 他人容器 7 个（vllm_lmt/qwen38/kimi3 等），入册时 NPU HBM 全空闲（~3G/chip 基线）
+- **HBM 基线**: ~3.1G/chip
+
+### S10: 192.168.13.165（2026-08-19 入册）
+
+- **IP**: `192.168.13.165`
+- **型号**: Atlas 800I A3（8 NPU = 16 chips × Ascend 910，每 chip 64GB HBM，npu-smi 26.0.rc1）
+- **OS**: openEuler 22.03 LTS-SP4, aarch64
+- **Hostname**: ipb21b04a5
+- **SSH 登录**: `root@192.168.13.165`（免密已配，2026-08-19）
+- **磁盘**: `/` 3.5T（32% 用，2.3T 可用），无独立 /home 分区
+- **共享情况**: 他人容器约 19 个（refactor_8xx/vllm-bgq/zyj_* 等，多为 vllm-ascend nightly 镜像），**入册时 chip 0-3 HBM 已被占 ~59G/64G**，用前必查 `npu-smi info`
+- **HBM 基线**: 空闲 chip ~2.9G/chip
 
 ## 硬件规格
 
@@ -128,6 +153,13 @@
 - 踩坑：缺 `HwHiAiUser` 用户（ERR 0x0091）、缺匹配版 `kernel-devel`
 - 补齐基础工具（tar/vim/git/cmake/numactl/tmux/jq/htop 等一批）
 - 详细流程见 [HDK-裸机安装指南](hdk-installation.md)
+
+### 2026-08-19
+
+- **S9（192.168.13.162）/ S10（192.168.13.165）入册**：A3 共享机，root 免密直连
+- 两台均为 8 NPU = 16 chips，npu-smi 26.0.rc1，openEuler 22.03 LTS-SP4 aarch64，HDK/Docker 已就绪
+- S9：他人容器 7 个但 NPU 空闲；`/` 仅 14G 余（大文件放 /home）
+- S10：他人容器约 19 个，chip 0-3 HBM 被占 ~59G，使用前先 `npu-smi info` 挑空闲 chip
 
 ---
 
