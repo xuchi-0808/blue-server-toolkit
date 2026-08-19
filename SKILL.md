@@ -110,6 +110,11 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
 - **容器创建前确认**：执行容器相关操作前，如果上下文中没有明确的镜像 ID
   和容器名，需要向用户询问使用什么镜像、容器名起成什么样。如果用户回复
   "你自己看着办"之类的授权，AI 可自行决定
+- **HF-only 权重走 hf-mirror 直连，不用代理**（2026-08-19 实测）：下权重
+  优先 ModelScope；仅 HF 独有的权重才走 HF，且不需要代理隧道——容器内
+  `export HF_ENDPOINT=https://hf-mirror.com` 后用 `hf download` 直连即可。
+  注意：新版 `hf` CLI 参数是 `--local-dir`（连字符）；宿主机通常没装
+  huggingface_hub，在容器里执行。
 - **蓝区代理穿透**：蓝区服务器无法直接访问外网 PyPI/docker 等。标准做法
   是用 SSH 反向端口转发，把本地代理（如端口 7897）映射到远端：
   `ssh -R 7897:127.0.0.1:7897 {user}@{host} -f -N`
@@ -166,7 +171,8 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
 ### 模型下载
 | 操作 | 命令 |
 |------|------|
-| 后台下载 | `ssh {user}@{host} "cd {weights_root} && nohup modelscope download {model_id} --local_dir {target_dir} --max-workers 16 >> {target_dir}/download.log 2>&1 &"` |
+| ModelScope 后台下载（优先） | `ssh {user}@{host} "cd {weights_root} && nohup modelscope download {model_id} --local_dir {target_dir} --max-workers 16 >> {target_dir}/download.log 2>&1 &"` |
+| HF 后台下载（仅 HF 独有权重，免代理） | `ssh {user}@{host} "docker exec {container} bash -c 'export HF_ENDPOINT=https://hf-mirror.com && cd {weights_root} && nohup hf download {model_id} --local-dir {target_dir} --max-workers 16 >> {target_dir}/download.log 2>&1 &'"` |
 | 查看进度 | `ssh {user}@{host} "tail -n 5 {target_dir}/download.log"` |
 | 已完成大小 | `ssh {user}@{host} "du -sh {target_dir}/{model_name}"` |
 
