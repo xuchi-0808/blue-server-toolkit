@@ -1,6 +1,8 @@
 # vllm-ascend 源码编译安装（AI 速查）
 
-长尾 FAQ 原文：https://ascend-inference-wiki.readthedocs.io/zh-cn/latest/guides/environment/building-vllm-ascend-from-source/
+> 本文档为命令速查版；遇到未覆盖的报错或信息不全时，访问原文获取全量：
+> https://ascend-inference-wiki.readthedocs.io/zh-cn/latest/guides/environment/building-vllm-ascend-from-source/
+
 在 vllm/ 和 vllm-ascend/ 仓根分别执行，容器内操作。
 
 ## 版本配套（装 vllm 前先查）
