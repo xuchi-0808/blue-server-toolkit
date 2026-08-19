@@ -261,7 +261,8 @@ TP4 需要 4 个 chip（2 张 NPU），TP8 需要 8 个 chip（4 张 NPU）。
 ### vLLM 服务管理
 
 后台启动用 `docker exec -d`，健康检查用 `curl localhost:<port>/v1/models`，
-停止服务用 `kill -9 <PID>`（从 npu-smi info 获取）。A3 可同时跑 4 个 TP4 服务
+停止服务用 `kill -9 <PID>`（从 npu-smi info 获取）。拉起服务的 cwd 不要在
+vllm 代码仓内（仓目录与 pip 包重名冲突）。A3 可同时跑 4 个 TP4 服务
 （端口 8000-8003，各用独立 chip 组）。
 
 > 触发场景：vLLM 启动/停止/多服务并行、关键参数配置、并发验证
