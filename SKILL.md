@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.7
+  version: 1.8
 ---
 
 # Blue Server Toolkit
@@ -266,6 +266,16 @@ TP4 需要 4 个 chip（2 张 NPU），TP8 需要 8 个 chip（4 张 NPU）。
 
 > 触发场景：vLLM 启动/停止/多服务并行、关键参数配置、并发验证
 > 详见 `~/.blue_server_toolkit/docs/vllm-service-guide.md`
+
+### vllm-ascend 源码编译
+
+容器内两步装：先 `VLLM_TARGET_DEVICE=empty pip install -v -e . --no-build-isolation`
+装**配套版本**的 vllm（配套关系查 `.github/vllm-release-tag.commit`），再装
+vllm-ascend（蓝区用阿里云 pip 镜像源）。镜像预装的 vllm 先 uninstall，否则
+pip 认为已满足而跳过。
+
+> 触发场景：源码安装/升级 vllm-ascend、bisect 切版本、镜像内版本不满足需求
+> 详见 `~/.blue_server_toolkit/docs/vllm-ascend-build.md`（精简自 Ascend Inference Wiki，长尾 FAQ 见原文链接）
 
 ### Graph 模式调试
 
