@@ -269,13 +269,12 @@ TP4 需要 4 个 chip（2 张 NPU），TP8 需要 8 个 chip（4 张 NPU）。
 
 ### vllm-ascend 源码编译
 
-容器内两步装：先 `VLLM_TARGET_DEVICE=empty pip install -v -e . --no-build-isolation`
-装**配套版本**的 vllm（配套关系查 `.github/vllm-release-tag.commit`），再装
-vllm-ascend（蓝区用阿里云 pip 镜像源）。镜像预装的 vllm 先 uninstall，否则
-pip 认为已满足而跳过。
+两步：vllm/ 仓根 `VLLM_TARGET_DEVICE=empty pip install -v -e . --no-build-isolation`
+（先 `pip uninstall vllm vllm-ascend -y`，版本配套查 `.github/vllm-release-tag.commit`）；
+vllm-ascend/ 仓根同法装，蓝区加 `-i https://mirrors.aliyun.com/pypi/simple/`。
 
 > 触发场景：源码安装/升级 vllm-ascend、bisect 切版本、镜像内版本不满足需求
-> 详见 `~/.blue_server_toolkit/docs/vllm-ascend-build.md`（精简自 Ascend Inference Wiki，长尾 FAQ 见原文链接）
+> 详见 `~/.blue_server_toolkit/docs/vllm-ascend-build.md`（命令速查 + 按报错关键字 FAQ）
 
 ### Graph 模式调试
 
