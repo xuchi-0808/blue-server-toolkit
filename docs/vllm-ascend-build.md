@@ -38,4 +38,3 @@ python -c "import vllm_ascend; print(vllm_ascend.__version__)"
 | `Stale file handle` / CPack 缺 `CANN-custom_ops*.run` | `rm -rf csrc/build build`（CPack 场景再加 `csrc/output`）后重装 |
 | `CMakeCache.txt ... is different than the directory`（从其他任务目录 cp 来的仓） | 缓存写死了旧仓绝对路径，`rm -rf csrc/build csrc/output build` 后重装 |
 | vllm 版本号显示 `dev` | 拉目标 tag，或装前 export `SETUPTOOLS_SCM_PRETEND_VERSION=<版本>` |
-| `vllm serve` 拉起后异常（import 到仓内代码） | 拉起服务的 cwd 不要在 vllm 代码仓内（仓目录与 pip 包重名冲突）；换其它路径执行 |
