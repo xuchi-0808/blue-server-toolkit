@@ -2,13 +2,13 @@
 
 ## 常用镜像源
 
-| 源 | 镜像地址 | 实测（197 蓝区直连） | 说明 |
+| 源 | 镜像地址 | 实测（蓝区直连） | 说明 |
 |----|----------|---------------------|------|
 | 官方 quay | `quay.io/ascend/vllm-ascend` | ~0.2MB/s | 海外 CDN（us-east-1），蓝区直连基本不可用 |
 | 南大镜像 | `quay.nju.edu.cn/ascend/vllm-ascend` | ~18MB/s | 匿名可拉，与官方同 digest，**蓝区推荐** |
 | 华为内网 | `cr.rnd.huawei.com/images/vllm-ascend` | 未测通 | 同事反馈最快；需 rnd 内网 DNS/路由，蓝区当前 VPN 不可达 |
 
-> 以上测速为 2026-08-06 在 192.168.13.197（s3）实测；`quay.nju.edu.cn` 通过 `tags/list` 匿名 API 确认包含 `nightly-main-a3` 等 tag。
+> 以上测速为 2026-08-06 在蓝区 A3 服务器实测；`quay.nju.edu.cn` 通过 `tags/list` 匿名 API 确认包含 `nightly-main-a3` 等 tag。
 
 ## 用法
 

@@ -1,4 +1,4 @@
-# Blue Server Toolkit v1.4
+# Blue Server Toolkit v1.7
 
 一套通用 AI skill，用于操作远程开发服务器（蓝区服务器）。覆盖 80% 日常高频操作：连接检查、代码同步、UT 运行、模型下载、日志查看、容器管理、文件传输。
 
@@ -27,7 +27,7 @@ AI 在首次激活时会引导你完成服务器配置。如果连接遇到问�
 建议先 clone 本仓，再让 AI 读取本地目录完成安装：
 
 ```text
-我正在使用 Claude Code（或其他工具名），请阅读 /home/xuchi/Documents/Code/AgentSkills/blue-server-toolkit/ 的内容，帮我把这个 skill 正确安装。安装完成后告诉我如何使用。
+我正在使用 Claude Code（或其他工具名），请阅读 ~/Documents/Code/AgentSkills/blue-server-toolkit/ 的内容，帮我把这个 skill 正确安装。安装完成后告诉我如何使用。
 ```
 
 把上面这段话中的路径改成你的实际路径，AI 就会：
@@ -113,20 +113,19 @@ blue-server-toolkit/
 ├── SKILL.md              # 核心 skill 文件（AI 入口）
 ├── README.md             # 本文件
 ├── LICENSE               # MIT
-├── config.json           # 配置模板
+├── config.example.json   # 配置模板（个人配置在 ~/.blue_server_toolkit/config.json）
 ├── scripts/              # 辅助脚本
 │   ├── check-npu.sh      # NPU 状态检查
 │   ├── init-config.sh    # 配置初始化
 │   ├── start-docker-A2.sh
 │   ├── start-docker-A3.sh
 │   └── start-docker-A5.sh
-└── docs/                 # 参考文档
+└── docs/                 # 参考文档（仅通用知识，个人机器信息不进仓）
     ├── a3-chip-numbering.md
     ├── graph-debugging.md
     ├── hdk-installation.md
     ├── image-mirrors.md
     ├── npu-process-cleanup.md
-    ├── server-configs.md
     └── vllm-service-guide.md
 ```
 
