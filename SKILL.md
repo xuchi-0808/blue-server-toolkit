@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.6
+  version: 1.7
 ---
 
 # Blue Server Toolkit
@@ -85,6 +85,21 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
 
 所有字段都可以随时修改（用户自己改或告诉 AI 代改）。`version` 字段
 用来追踪和 SKILL.md 的版本匹配。
+
+## 用户配置与 Skill 本体分离
+
+本仓（公开在 GitHub）只放**通用可复用知识**；用户的**个人环境信息一律放
+本地 `~/.blue_server_toolkit/`**，不写入本仓：
+
+| 归属 | 位置 | 内容 |
+|------|------|------|
+| Skill 本体（git 仓） | 本仓 `SKILL.md` / `docs/` | 命令模板、通用踩坑、机型/驱动知识 |
+| 用户配置（本地） | `~/.blue_server_toolkit/config.json` | 机器清单（IP/账号/容器）、目录约定、命令限制 |
+| 用户笔记（本地） | `~/.blue_server_toolkit/notes/` | 机器档案（磁盘/HBM/共享情况）、权重清单、环境变更历史 |
+
+**红线**：IP、hostname、机器清单、个人路径、任务状态等环境信息禁止写进
+本仓。新服务器入册 = 改 `config.json` + 补 `notes/` 档案，**不是**往
+`docs/` 写 md。
 
 ## 经验备忘
 
@@ -271,11 +286,13 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 
 ### 服务器配置与存储
 
-`/root` 分区通常较小（S1: 69G），大文件放 `/home`。模型缓存已迁移到
-`/home/.cache-root/`（通过软链）。S3/S4 为 A3 机器（16 chip），S1/S2 为 A2（8 NPU）。
+`/root` 分区通常较小，大文件放 `/home`；模型缓存可软链迁到大盘
+（`ln -s /home/.cache-root ~/.cache`）。哪台机器什么配置、磁盘剩多少、
+权重放哪属于**个人环境信息**——查本地 `~/.blue_server_toolkit/config.json`
+和 `~/.blue_server_toolkit/notes/server-configs.md`，不写入本仓
+（见「用户配置与 Skill 本体分离」）。
 
-> 触发场景：磁盘空间不足、权重路径查询、新服务器入册
-> 详见 `~/.blue_server_toolkit/docs/server-configs.md`
+> 触发场景：磁盘空间不足、权重路径查询、新服务器入册（改本地 config.json + notes/）
 
 ### 镜像源与拉取
 
@@ -329,7 +346,7 @@ rm <坏掉的软链路径>
 rsync -a --exclude '.git' --exclude '.DS_Store' "$HOME/Documents/Code/AgentSkills/blue-server-toolkit/" <目标路径>/
 ```
 
-**维护原则**：使用蓝区服务器时，遇到 skill 未覆盖的新情况、合作总结出新经验后，主动写回源码仓（commit 带 `-s`）即完成三处 skill 安装同步；运行时目录 docs/ 顺手 `cp` 更新；新增文档同时在「进阶指南」加索引条目，并 bump frontmatter 的 version。
+**维护原则**：使用蓝区服务器时，遇到 skill 未覆盖的新情况、合作总结出新经验后，主动写回源码仓（commit 带 `-s`）即完成三处 skill 安装同步；运行时目录 docs/ 顺手 `cp` 更新；新增文档同时在「进阶指南」加索引条目，并 bump frontmatter 的 version。写回前先过「用户配置与 Skill 本体分离」红线——个人环境信息只进本地 config.json / notes/，通用知识才进仓。
 
 ## 扩展
 
