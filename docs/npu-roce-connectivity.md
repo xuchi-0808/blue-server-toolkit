@@ -20,4 +20,5 @@ hccn_tool -i 0 -tls -g | grep switch
 ## 坑
 
 - `hccn_tool -i N -link -g` 的 link status（DOWN）、net_health（Init/Fault）在部分环境**失真**：整批机器全报 DOWN 但 hccs_ping 实际全通。判断互联以 hccs_ping 实测为准，**勿因 link DOWN 判物理不通**。
-- ping 通 ≠ PD 一定通：传输层仍失败时，查容器是否挂载 `/etc/hccn.conf`、vnic 路由等配置层问题。
+- **主机 ping 通 ≠ 端口通**：部分机器 firewalld 开着重载规则，INPUT 只放 22，跨机 TCP（分布式通信端口）全被 reject。跨机场景先 `systemctl is-active firewalld`，active 则停；端口级验证用 `timeout 3 bash -c "echo > /dev/tcp/<IP>/<PORT>"`。
+- ping 通 ≠ PD 一定通：传输层仍失败时，查容器是否挂载 `/etc/hccn.conf`、防火墙、路由等配置层问题。
