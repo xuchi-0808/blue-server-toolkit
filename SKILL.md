@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.8
+  version: 1.9
 ---
 
 # Blue Server Toolkit
@@ -257,6 +257,15 @@ TP4 需要 4 个 chip（2 张 NPU），TP8 需要 8 个 chip（4 张 NPU）。
 
 > 触发场景：配置 ASCEND_RT_VISIBLE_DEVICES、TP 并行度设置、npu-smi 输出解读
 > 详见 `~/.blue_server_toolkit/docs/a3-chip-numbering.md`
+
+### NPU 跨机互联检查
+
+多机 PD/MC2 数据面走 NPU RDMA，主机互 ping 通不算数。检查：`hccn_tool -i 0 -vnic -g`
+取 IP → `hccn_tool -i 0 -hccs_ping -g address <对端IP>` 实测（A2 用 `-ping`）；TLS 各机一致。
+**坑：`-link -g` 报 DOWN 在部分环境失真，勿据此判物理不通。**
+
+> 触发场景：多机 PD 分离、MC2、跨机 RDMA 连通性验证
+> 详见 `~/.blue_server_toolkit/docs/npu-roce-connectivity.md`
 
 ### vLLM 服务管理
 
