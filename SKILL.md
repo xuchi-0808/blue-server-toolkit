@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.9
+  version: 1.10
 ---
 
 # Blue Server Toolkit
@@ -207,6 +207,7 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
 | 启动 | `ssh {user}@{host} "docker start {container}"` |
 | 交互式进入 | `ssh -t {user}@{host} "docker exec -it {container} bash"` |
 | 执行命令 | `ssh {user}@{host} "docker exec {container} bash -c '{command}'"` |
+| PID 反查容器 | `bash ~/.blue_server_toolkit/scripts/who.sh {host} {user} {pid}` |
 
 ### 文件同步
 | 操作 | 命令 |
@@ -341,6 +342,7 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 | 脚本 | 用途 | 用法 |
 |------|------|------|
 | check-npu.sh | NPU 状态检查 | `bash ~/.blue_server_toolkit/scripts/check-npu.sh <host> <user> [container]` |
+| who.sh | 宿主机 PID 反查所属 Docker 容器（npu-smi 的 PID → 容器 ID/镜像/名称） | `bash ~/.blue_server_toolkit/scripts/who.sh <host> <user> <pid>` |
 | init-config.sh | 初始化配置与安装 | `bash ~/.blue_server_toolkit/scripts/init-config.sh` |
 | start-docker-A2.sh | 创建 A2 容器（8 NPU 单芯） | scp 到服务器后 `bash start-docker-A2.sh <image_id> <name>` |
 | start-docker-A3.sh | 创建 A3 容器（16 chip 单卡双芯） | scp 到服务器后 `bash start-docker-A3.sh <image_id> <name>` |

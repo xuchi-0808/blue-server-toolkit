@@ -61,7 +61,7 @@ kill -9 818449 2199895 818450 ...
 docker stop xc_vllm_A00280   # 停容器 = 杀掉里面全部进程 = HBM 自动释放
 ```
 
-> 区别于方式二的 `pkill -9`：`pkill` 是在容器**内部**强杀单个 Python 进程，进程没机会 cleanup → 孤儿显存要等驱动 GC。而 `docker stop` 是杀整个容器（含全部 worker 子进程），驱动会把这个容器占用的 NPU 资源整体回收，因此**不需要等 GC、不需要 reset**。判断标准：确认该 HBM 是不是属于"某个容器"——是就 `docker stop`，是裸机进程才走方式二/三/四。
+> 区别于方式二的 `pkill -9`：`pkill` 是在容器**内部**强杀单个 Python 进程，进程没机会 cleanup → 孤儿显存要等驱动 GC。而 `docker stop` 是杀整个容器（含全部 worker 子进程），驱动会把这个容器占用的 NPU 资源整体回收，因此**不需要等 GC、不需要 reset**。判断标准：确认该 HBM 是不是属于"某个容器"——npu-smi 进程表里的 PID 用 `bash ~/.blue_server_toolkit/scripts/who.sh {host} {user} {pid}` 反查所属容器；是容器就 `docker stop`，是裸机进程才走方式二/三/四。
 
 ### 方式四：芯片级重置（终极手段）
 
