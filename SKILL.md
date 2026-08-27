@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.10
+  version: 1.12
 ---
 
 # Blue Server Toolkit
@@ -246,8 +246,9 @@ docker tag quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3 quay.io/ascend/vll
 标准流程：`npu-smi info` 查 PID → `kill -9 <pid>`（精准 PID，执行前需提醒用户）。
 禁止 `pkill -9 -f python`（模糊匹配误杀共享服务器上其他用户进程）。
 孤儿 HBM（npu-smi 无进程但显存仍占满）→ `docker restart` 容器。
+判机空闲须在**宿主机**跑 npu-smi 看 HBM 数值（容器内他人进程名列可能空白，"无进程名"≠空闲），辅以 `ss -tlnp` 查端口；`docker ps` 只用于占用归因和接管清点，不作空闲判据。
 
-> 触发场景：HBM 占用异常、服务重启报 Free memory 不足、进程残留
+> 触发场景：HBM 占用异常、服务重启报 Free memory 不足、进程残留、上机前判断机器是否空闲
 > 详见 `~/.blue_server_toolkit/docs/npu-process-cleanup.md`
 
 ### A3 芯片编号
@@ -263,7 +264,7 @@ TP4 需要 4 个 chip（2 张 NPU），TP8 需要 8 个 chip（4 张 NPU）。
 
 多机 PD/MC2 数据面走 NPU RDMA，主机互 ping 通不算数。检查：`hccn_tool -i 0 -vnic -g`
 取 IP → `hccn_tool -i 0 -hccs_ping -g address <对端IP>` 实测（A2 用 `-ping`）；TLS 各机一致。
-**坑：`-link -g` 报 DOWN 在部分环境失真，勿据此判物理不通。**
+**坑：`-link -g` 报 DOWN 在部分环境失真，勿据此判物理不通；hccs_ping 只覆盖 NPU 网，PD 的 dp-rpc/proxy 走主机 TCP——跨机前每台 `systemctl is-active firewalld`，active 必停（默认 INPUT 只放 22，跨机 TCP 全被 reject）。**
 
 > 触发场景：多机 PD 分离、MC2、跨机 RDMA 连通性验证
 > 详见 `~/.blue_server_toolkit/docs/npu-roce-connectivity.md`
@@ -327,6 +328,10 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 - `sudo rm -rf /` — 系统级删除
 - `reboot` — 重启服务器
 - `pkill -9 -f python` — 模糊匹配杀所有 python 进程，误杀风险极高
+- `docker system prune` 及一切 prune 变体（`container/image/builder/network/volume prune`）— 批量删除全机 stopped 容器与悬空镜像，他人 stop 后待复用的容器会被连可写层一起删除且**不可恢复**，共享机必伤及无辜
+
+### 磁盘空间不足的处理红线
+磁盘不足（df 满/接近满）时 AI 的唯一动作是**阻塞式上报用户并等待处置指示**，禁止自动执行任何清理行为（prune、删日志、删缓存、rm 等）。腾空间只允许"列全量清单逐个指名 + 用户逐项确认"后执行；破坏性命令写进任务书前先假设"撤销指令可能来不及到达"。
 
 ### 需确认命令（执行前需提醒用户）
 - `rm -rf` — 递归删除
