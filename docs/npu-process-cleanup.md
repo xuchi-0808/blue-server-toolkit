@@ -70,8 +70,21 @@ docker stop xc_vllm_A00280   # 停容器 = 杀掉里面全部进程 = HBM 自动
 npu-smi set -t reset -i <npu_id> -c <chip_id>
 ```
 
+## 判机是否空闲（上机前检查）
+
+在**宿主机**（不要在容器内）执行以下两项检查，都通过才判定空闲：
+
+```bash
+ssh <user>@<host> "npu-smi info"                              # 看 HBM-Usage：每芯几 GB 为基线，几十 GB 即被占用
+ssh <user>@<host> "ss -tlnp | grep -E ':8000|:8080|:9000'"    # 常用推理服务端口
+```
+
+- 判占用看 **HBM 数值**，不以进程名为依据：容器内执行 npu-smi 时，其他容器/宿主机进程的进程名列可能空白（容器 PID namespace 解析不到这些 PID）
+- `docker ps` 不作空闲判据（他人容器 Up 但不占 NPU/端口时无冲突），仅用于：占用归因（谁在用）、接管清点（要停的容器名单）
+
 ## 教训
 
 - **不要 `pkill -9 -f python`（模糊匹配），精准 `kill -9 PID` 是标准流程**
 - HBM 释放是异步的，杀完进程后等几分钟再拉新服务
 - 如果急着重置，用 `npu-smi set -t reset`，不要改服务配置来绕过显存不足
+- 判机空闲依据宿主机 HBM 数值 + 端口占用，不以进程名为依据（容器内 npu-smi 进程名列可能空白）
