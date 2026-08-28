@@ -17,3 +17,6 @@ config.local.json
 
 # Mimosa plugin workspace
 .mimosa/
+
+# Local agent instructions (not synced to GitHub)
+AGENTS.md
