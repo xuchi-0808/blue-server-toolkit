@@ -1,4 +1,4 @@
-# Blue Server Toolkit v1.10
+# Blue Server Toolkit v1.13
 
 一套通用 AI skill，用于操作远程开发服务器（蓝区服务器）。覆盖 80% 日常高频操作：连接检查、代码同步、UT 运行、模型下载、日志查看、容器管理、文件传输。
 
@@ -128,6 +128,7 @@ blue-server-toolkit/
     ├── hdk-installation.md
     ├── image-mirrors.md
     ├── npu-process-cleanup.md
+    ├── npu-roce-connectivity.md
     ├── vllm-ascend-build.md
     └── vllm-service-guide.md
 ```
