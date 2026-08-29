@@ -49,6 +49,23 @@ A3 有 16 张 NPU 卡（chips 0-15），可同时跑 4 个 TP4 服务：
 
 每个服务需独立端口 + 独立 `ASCEND_RT_VISIBLE_DEVICES`，互不干扰。
 
+## PD 分离的请求路径（必须走 proxy）
+
+验证 PD 分离（kv_producer/kv_consumer）时，**请求不能直打 D 端口**：直打时 D 会在本地
+做 prefill，P 全程收不到任何请求——链路实际不是 PD，测出来的 TTFT/显存/防御行为全部失真。
+
+- 症状识别：D 日志出现 prefill 活动；P 日志零请求；V2 + oproj TP 时 D 直接抛
+  `ValueError: oproj TP requires ... (num_tokens=N, max_cudagraph_capture_size=...)`（本地
+  prefill 的 eager 步触发防御）。
+- 正确做法：起 vllm-ascend 仓的 load-balance proxy（`examples/disaggregated_prefill_v1/
+  load_balance_proxy_server_example.py`），请求打 proxy，由它分发给 P prefill + KV 迁移 +
+  D decode 回传：
+  ```bash
+  nohup python <vllm-ascend>/examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py \
+    --port 8090 --prefill <P_IP:8080> --decode <D_IP:8210> > proxy.log 2>&1 &
+  curl http://<proxy>:8090/v1/chat/completions ...
+  ```
+
 ## 关键参数备忘
 
 - `num_speculative_tokens`：TP4 时必须设为 3（不能设 2，与 TP4 的 cudagraph shapes 冲突）
