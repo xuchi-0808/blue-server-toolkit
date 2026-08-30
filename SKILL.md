@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.16.0
+  version: 1.16.1
 ---
 
 # Blue Server Toolkit
@@ -155,18 +155,11 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   fetch（build_aclnn.sh 拉 catlass 失败）全踩。根治：容器内
   `chown -R root:root <code_dir>`（或 `git config --global --add
   safe.directory <repo>` 逐个打补丁，不如 chown 干净）。
-- **A3 机型算力判定（560T/752T）**：`ascend-dmi` 需先在宿主机 source
-  `/usr/local/Ascend/toolbox/set_env.sh` 和
-  `/usr/local/Ascend/ascend-toolkit/set_env.sh` 才可用。实测跑
-  `for i in {0..7}; do ascend-dmi -f -d $i -q; done`，看 **TFLOPS@FP16** 列：
-  ≈560-580 → 560T 机型；≈750+ → 752T 机型。注意是真实压测（每芯约 2s、
-  ~300W），NPU 被占用时勿跑。一键脚本：`scripts/flops-A3.sh`。宿主机未装
-  toolbox（出厂机常见，CANN 9.x 不自带 ascend-dmi）时补装
-  `Ascend-mindx-toolbox_<版本>_linux-aarch64.run`：优先从**同代驱动的机器**
-  拷原包（公开镜像源无此包，hiascend 下载页需登录）；版本须与驱动配套
-  （26.0.x ↔ 26.0.RC1），不配套报故障码 46。详见 `docs/hdk-installation.md`
-  补装一节。无 toolbox 时的替代：任一含 torch_npu 的容器内跑 `flops-torch.py`
-  （fp16 matmul 峰值：560T 实测 ~230-250，752T 预估 ~320，阈值 280；同为真实压测）。
+- **A3 机型算力判定（560T/752T）**：宿主机一般没装 torch，去任一 vllm 镜像容器
+  里跑 `flops-torch.py`（stdin 管道进容器，服务器零落盘，用法见脚本索引）。
+  单 die fp16 matmul 峰值：560T 机型实测 ~230-250 TFLOPS；752T 预估 ~320
+  （阈值 280，待真机标定后更新脚本常量）。真实压测（数秒、数百瓦），
+  die 被占用时勿跑。
 
 ## 命令参考
 
@@ -314,10 +307,9 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 ### 裸机驱动安装
 
 从空白 Atlas 800I A3 装到 `npu-smi info` 可用。关键顺序：先装基础工具（含 tar）
-→ 创建 HwHiAiUser → 下载驱动+固件 → 先驱动后固件。文末含 toolbox（ascend-dmi）
-补装流程。
+→ 创建 HwHiAiUser → 下载驱动+固件 → 先驱动后固件。
 
-> 触发场景：新服务器初始化、npu-smi 不可用、驱动/固件安装、ascend-dmi 不可用补装 toolbox
+> 触发场景：新服务器初始化、npu-smi 不可用、驱动/固件安装
 > 详见 `~/.blue_server_toolkit/docs/hdk-installation.md`
 
 ### 服务器配置与存储
@@ -362,8 +354,7 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 | 脚本 | 用途 | 用法 |
 |------|------|------|
 | check-npu.sh | NPU 状态检查 | `bash ~/.blue_server_toolkit/scripts/check-npu.sh <host> <user> [container]` |
-| flops-A3.sh | A3 实测算力并判定机型（TFLOPS@FP16 → 560T/752T） | `bash ~/.blue_server_toolkit/scripts/flops-A3.sh <host> <user>` |
-| flops-torch.py | A3 算力实测，无 toolbox 依赖（容器内 torch matmul） | `ssh {user}@{host} "docker exec -i {container} python3 -" < ~/.blue_server_toolkit/scripts/flops-torch.py` |
+| flops-torch.py | A3 算力实测并判定机型（单 die fp16 matmul → 560T/752T） | `ssh {user}@{host} "docker exec -i {container} python3 -" < ~/.blue_server_toolkit/scripts/flops-torch.py` |
 | who.sh | 宿主机 PID 反查所属 Docker 容器（npu-smi 的 PID → 容器 ID/镜像/名称） | `bash ~/.blue_server_toolkit/scripts/who.sh <host> <user> <pid>` |
 | init-config.sh | 初始化配置与安装 | `bash ~/.blue_server_toolkit/scripts/init-config.sh` |
 | start-docker-A2.sh | 创建 A2 容器（8 NPU 单芯） | scp 到服务器后 `bash start-docker-A2.sh <image_id> <name>` |
