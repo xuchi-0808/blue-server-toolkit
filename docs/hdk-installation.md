@@ -143,3 +143,27 @@ dnf install -y "kernel-devel-$(uname -r)"
 | OS | openEuler 22.03 LTS-SP4 aarch64 |
 
 > 早期资料说"SP4 装驱动会失败"，那是对**老版本驱动**而言。26.0.RC1 对 SP4 + kernel 5.10 兼容良好，无需降级系统。
+
+## 补装 Toolbox（ascend-dmi 查算力，可选）
+
+宿主机无 `/usr/local/Ascend/toolbox` 时 `ascend-dmi` 不可用（CANN 9.x toolkit **不自带**，
+是独立的 `Ascend-mindx-toolbox_*_linux-aarch64.run` 包）。2026-08-30 S9 实测：
+
+```bash
+# 配套：toolbox 版本跟驱动代（26.0.1.1 ↔ 驱动 26.0.RC1；7.3.T ↔ 25.5.x），
+# 不配套压测类命令报驱动故障码 46
+# 获取优先级：① 同代驱动机器上拷原包（最快——公开镜像源无此包，hiascend 下载页需登录）
+ssh root@<src> 'cat /root/packages/Ascend-mindx-toolbox_*.run' | ssh root@<dst> 'cat > /root/x.run'
+# ② 本地登录 hiascend CANN 下载页下载后 scp 上去
+
+chmod +x Ascend-mindx-toolbox_*_linux-aarch64.run
+./Ascend-mindx-toolbox_*_linux-aarch64.run --check    # 完整性校验
+./Ascend-mindx-toolbox_*_linux-aarch64.run --install --install-for-all --quiet
+# ~3 秒装完，落位 /usr/local/Ascend/toolbox（仅 25M），不动驱动/固件
+
+# 验证（查算力需 toolbox + ascend-toolkit 两个 set_env 都 source）
+source /usr/local/Ascend/toolbox/set_env.sh && source /usr/local/Ascend/ascend-toolkit/set_env.sh
+ascend-dmi --version    # → 26.0.1.1
+```
+
+装完用 `scripts/flops-A3.sh` 一键实测 TFLOPS@FP16 并判定 560T/752T 机型。

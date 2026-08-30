@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.15.1
+  version: 1.15.2
 ---
 
 # Blue Server Toolkit
@@ -161,9 +161,11 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   `for i in {0..7}; do ascend-dmi -f -d $i -q; done`，看 **TFLOPS@FP16** 列：
   ≈560-580 → 560T 机型；≈750+ → 752T 机型。注意是真实压测（每芯约 2s、
   ~300W），NPU 被占用时勿跑。一键脚本：`scripts/flops-A3.sh`。宿主机未装
-  toolbox（无该目录/命令，如部分出厂机）时：昇腾社区 CANN 下载页下
-  `Ascend-mindx-toolbox_<版本>_linux-aarch64.run`，root 执行 `--install`
-  即装到 `/usr/local/Ascend/toolbox`；版本须与驱动配套（不配套报驱动故障码 46）。
+  toolbox（出厂机常见，CANN 9.x 不自带 ascend-dmi）时补装
+  `Ascend-mindx-toolbox_<版本>_linux-aarch64.run`：优先从**同代驱动的机器**
+  拷原包（公开镜像源无此包，hiascend 下载页需登录）；版本须与驱动配套
+  （26.0.x ↔ 26.0.RC1），不配套报故障码 46。详见 `docs/hdk-installation.md`
+  补装一节。
 
 ## 命令参考
 
@@ -311,9 +313,10 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 ### 裸机驱动安装
 
 从空白 Atlas 800I A3 装到 `npu-smi info` 可用。关键顺序：先装基础工具（含 tar）
-→ 创建 HwHiAiUser → 下载驱动+固件 → 先驱动后固件。
+→ 创建 HwHiAiUser → 下载驱动+固件 → 先驱动后固件。文末含 toolbox（ascend-dmi）
+补装流程。
 
-> 触发场景：新服务器初始化、npu-smi 不可用、驱动/固件安装
+> 触发场景：新服务器初始化、npu-smi 不可用、驱动/固件安装、ascend-dmi 不可用补装 toolbox
 > 详见 `~/.blue_server_toolkit/docs/hdk-installation.md`
 
 ### 服务器配置与存储
