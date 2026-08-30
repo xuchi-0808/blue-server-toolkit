@@ -1,7 +1,6 @@
 # HDK 裸机安装指南（Ascend 910B / A3）
 
 > 从一台完全空白的 Atlas 800I A3 裸机，装到 `npu-smi info` 可用。
-> 基于 Atlas 800I A3 裸机实战记录，2026-06。
 
 ## 前置：确认硬件与系统
 
@@ -49,7 +48,7 @@ useradd -g HwHiAiUser -d /home/HwHiAiUser -m HwHiAiUser -s /bin/bash
 
 只装 `npu-smi` 只需 2 个文件，都用 **`.run` 格式**：
 
-| 文件 | 示例（S4 用的版本） | 说明 |
+| 文件 | 示例版本 | 说明 |
 |------|------|------|
 | 驱动 | `Atlas-A3-hdk-npu-driver_26.0.RC1_linux-aarch64.run` | ~120MB |
 | 固件 | `Atlas-A3-hdk-npu-firmware_9.0.0.0.205.run` | ~280KB |
@@ -133,7 +132,7 @@ dnf install -y "kernel-devel-$(uname -r)"
 
 报 `ERR_NO:0x0091; ERR_DES:HwHiAiUser not exists`。见第 1 步，先建用户再装驱动。
 
-## 版本对应（S4 实测）
+## 版本对应（实测）
 
 | 组件 | 版本 |
 |------|------|
@@ -147,7 +146,7 @@ dnf install -y "kernel-devel-$(uname -r)"
 ## 补装 Toolbox（ascend-dmi 查算力，可选）
 
 宿主机无 `/usr/local/Ascend/toolbox` 时 `ascend-dmi` 不可用（CANN 9.x toolkit **不自带**，
-是独立的 `Ascend-mindx-toolbox_*_linux-aarch64.run` 包）。2026-08-30 S9 实测：
+是独立的 `Ascend-mindx-toolbox_*_linux-aarch64.run` 包）。
 
 ```bash
 # 配套：toolbox 版本跟驱动代（26.0.1.1 ↔ 驱动 26.0.RC1；7.3.T ↔ 25.5.x），

@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.15.2
+  version: 1.15.3
 ---
 
 # Blue Server Toolkit
@@ -125,7 +125,7 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
 - **容器创建前确认**：执行容器相关操作前，如果上下文中没有明确的镜像 ID
   和容器名，需要向用户询问使用什么镜像、容器名起成什么样。如果用户回复
   "你自己看着办"之类的授权，AI 可自行决定
-- **HF-only 权重走 hf-mirror 直连，不用代理**（2026-08-19 实测）：下权重
+- **HF-only 权重走 hf-mirror 直连，不用代理**：下权重
   优先 ModelScope；仅 HF 独有的权重才走 HF，且不需要代理隧道——容器内
   `export HF_ENDPOINT=https://hf-mirror.com` 后用 `hf download` 直连即可。
   注意：新版 `hf` CLI 参数是 `--local-dir`（连字符）；宿主机通常没装
@@ -136,20 +136,20 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   建好后在容器内设 `HTTP_PROXY=http://127.0.0.1:7897` 即可走本地代理出网。
   隧道易超时断开，操作前先检查远端端口是否在监听（`ss -tlnp | grep 7897`），
   发现断了就重建。此方式仅适用于用户本地代理正在运行且能访问目标源。
-- **命令输出重定向到日志文件再看**（2026-08-11 用户规范）：长/复杂命令在
+- **命令输出重定向到日志文件再看**：长/复杂命令在
   远端执行时，输出重定向到日志文件，然后分段查看（`tail -N`/`grep`）：
   `cmd > /tmp/xxx.log 2>&1; echo EXIT=$?` 后再 `tail -40 /tmp/xxx.log`。
   **不要**用 `| tail -N` 截断 stdout——会丢失错误上下文，且管道让 `$?`
   失效（pip 失败也显示成功），错误排查全靠猜。
-- **一次只做一个动作，不要顺手多做**（2026-08-11 用户反馈）：缺什么依赖就
+- **一次只做一个动作，不要顺手多做**：缺什么依赖就
   只装什么（如只 `pip install setuptools-rust`），不要"顺手"把相关包全装了
   ——多余动作可能引入网络/版本新失败源，且失败时难以定位。每一步确认
   退出码和结果后再做下一步。
-- **rsync 多源会平铺合并**（2026-08-11 踩坑）：一条 rsync 命令传多个源目录
+- **rsync 多源会平铺合并**：一条 rsync 命令传多个源目录
   到同一目标时，各源内容**平铺**进目标目录（同名文件互相覆盖，.git 冲突），
   不是各建子目录。每个仓必须单独 rsync 到自己的子目录：
   `rsync -az src1/ host:/dst/src1/ && rsync -az src2/ host:/dst/src2/`。
-- **rsync 跨 uid 传代码后容器内必须 chown**（2026-08-11 踩坑）：mac 上 rsync
+- **rsync 跨 uid 传代码后容器内必须 chown**：mac 上 rsync
   传过去的文件 owner 是本地 uid（如 501），容器内 git 访问报 `dubious
   ownership`——setuptools_scm（pip -e 装 vllm 时 metadata 失败）、submodule
   fetch（build_aclnn.sh 拉 catlass 失败）全踩。根治：容器内
@@ -370,7 +370,7 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 
 ## 维护与同步
 
-本 skill 采用**源码仓单一来源 + 软链**策略（2026-08-06 起）：改动源码仓即自动同步所有 skill 安装，无需逐份 rsync。
+本 skill 采用**源码仓单一来源 + 软链**策略：改动源码仓即自动同步所有 skill 安装，无需逐份 rsync。
 
 | 位置 | 路径 | 类型 |
 |------|------|------|
