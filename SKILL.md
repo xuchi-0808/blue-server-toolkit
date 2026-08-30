@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.15.0
+  version: 1.15.1
 ---
 
 # Blue Server Toolkit
@@ -160,7 +160,10 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   `/usr/local/Ascend/ascend-toolkit/set_env.sh` 才可用。实测跑
   `for i in {0..7}; do ascend-dmi -f -d $i -q; done`，看 **TFLOPS@FP16** 列：
   ≈560-580 → 560T 机型；≈750+ → 752T 机型。注意是真实压测（每芯约 2s、
-  ~300W），NPU 被占用时勿跑。一键脚本：`scripts/flops-A3.sh`。
+  ~300W），NPU 被占用时勿跑。一键脚本：`scripts/flops-A3.sh`。宿主机未装
+  toolbox（无该目录/命令，如部分出厂机）时：昇腾社区 CANN 下载页下
+  `Ascend-mindx-toolbox_<版本>_linux-aarch64.run`，root 执行 `--install`
+  即装到 `/usr/local/Ascend/toolbox`；版本须与驱动配套（不配套报驱动故障码 46）。
 
 ## 命令参考
 

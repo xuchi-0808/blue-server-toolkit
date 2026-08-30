@@ -22,7 +22,10 @@ ssh "$USER@$HOST" 'bash -s' <<'REMOTE'
   source /usr/local/Ascend/toolbox/set_env.sh 2>/dev/null
   source /usr/local/Ascend/ascend-toolkit/set_env.sh 2>/dev/null
   if ! command -v ascend-dmi >/dev/null 2>&1; then
-    echo "ERROR: ascend-dmi not found after sourcing set_env.sh"
+    echo "ERROR: ascend-dmi not found — host missing Ascend toolbox package."
+    echo "Fix (root): get Ascend-mindx-toolbox_<ver>_linux-aarch64.run from hiascend"
+    echo "CANN download page, then ./Ascend-mindx-toolbox_<ver>_linux-aarch64.run --install"
+    echo "(toolbox version must match the installed NPU driver)"
     exit 1
   fi
   LOG=/tmp/a3-flops.log
