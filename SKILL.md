@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.14.0
+  version: 1.15.0
 ---
 
 # Blue Server Toolkit
@@ -155,6 +155,12 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   fetch（build_aclnn.sh 拉 catlass 失败）全踩。根治：容器内
   `chown -R root:root <code_dir>`（或 `git config --global --add
   safe.directory <repo>` 逐个打补丁，不如 chown 干净）。
+- **A3 机型算力判定（560T/752T）**：`ascend-dmi` 需先在宿主机 source
+  `/usr/local/Ascend/toolbox/set_env.sh` 和
+  `/usr/local/Ascend/ascend-toolkit/set_env.sh` 才可用。实测跑
+  `for i in {0..7}; do ascend-dmi -f -d $i -q; done`，看 **TFLOPS@FP16** 列：
+  ≈560-580 → 560T 机型；≈750+ → 752T 机型。注意是真实压测（每芯约 2s、
+  ~300W），NPU 被占用时勿跑。一键脚本：`scripts/flops-A3.sh`。
 
 ## 命令参考
 
@@ -349,6 +355,7 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 | 脚本 | 用途 | 用法 |
 |------|------|------|
 | check-npu.sh | NPU 状态检查 | `bash ~/.blue_server_toolkit/scripts/check-npu.sh <host> <user> [container]` |
+| flops-A3.sh | A3 实测算力并判定机型（TFLOPS@FP16 → 560T/752T） | `bash ~/.blue_server_toolkit/scripts/flops-A3.sh <host> <user>` |
 | who.sh | 宿主机 PID 反查所属 Docker 容器（npu-smi 的 PID → 容器 ID/镜像/名称） | `bash ~/.blue_server_toolkit/scripts/who.sh <host> <user> <pid>` |
 | init-config.sh | 初始化配置与安装 | `bash ~/.blue_server_toolkit/scripts/init-config.sh` |
 | start-docker-A2.sh | 创建 A2 容器（8 NPU 单芯） | scp 到服务器后 `bash start-docker-A2.sh <image_id> <name>` |
