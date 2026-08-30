@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.15.3
+  version: 1.16.0
 ---
 
 # Blue Server Toolkit
@@ -165,7 +165,8 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   `Ascend-mindx-toolbox_<版本>_linux-aarch64.run`：优先从**同代驱动的机器**
   拷原包（公开镜像源无此包，hiascend 下载页需登录）；版本须与驱动配套
   （26.0.x ↔ 26.0.RC1），不配套报故障码 46。详见 `docs/hdk-installation.md`
-  补装一节。
+  补装一节。无 toolbox 时的替代：任一含 torch_npu 的容器内跑 `flops-torch.py`
+  （fp16 matmul 峰值：560T 实测 ~230-250，752T 预估 ~320，阈值 280；同为真实压测）。
 
 ## 命令参考
 
@@ -362,6 +363,7 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 |------|------|------|
 | check-npu.sh | NPU 状态检查 | `bash ~/.blue_server_toolkit/scripts/check-npu.sh <host> <user> [container]` |
 | flops-A3.sh | A3 实测算力并判定机型（TFLOPS@FP16 → 560T/752T） | `bash ~/.blue_server_toolkit/scripts/flops-A3.sh <host> <user>` |
+| flops-torch.py | A3 算力实测，无 toolbox 依赖（容器内 torch matmul） | `ssh {user}@{host} "docker exec -i {container} python3 -" < ~/.blue_server_toolkit/scripts/flops-torch.py` |
 | who.sh | 宿主机 PID 反查所属 Docker 容器（npu-smi 的 PID → 容器 ID/镜像/名称） | `bash ~/.blue_server_toolkit/scripts/who.sh <host> <user> <pid>` |
 | init-config.sh | 初始化配置与安装 | `bash ~/.blue_server_toolkit/scripts/init-config.sh` |
 | start-docker-A2.sh | 创建 A2 容器（8 NPU 单芯） | scp 到服务器后 `bash start-docker-A2.sh <image_id> <name>` |
