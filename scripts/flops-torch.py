@@ -1,14 +1,13 @@
-"""FP16 matmul TFLOPS benchmark for Ascend NPU (torch_npu) — no toolbox needed.
+"""FP16 matmul TFLOPS probe for Ascend NPU (single die, torch_npu).
 
-Run inside any container that has torch + torch_npu (e.g. vllm-ascend image);
-uses the first NPU device visible to that container:
+Hosts usually lack torch — run inside a vllm-ascend container (stdin pipe,
+nothing written server-side); uses the first NPU die visible to the container:
 
   ssh {user}@{host} "docker exec -i {container} python3 -" < flops-torch.py
 
-Peak fp16 matmul on the 560T SKU measures ~230-250 TFLOPS (aclnn GEMM,
-~43% of ascend-dmi counting); 752T SKU expected ~320 by scaling.
-Classification threshold 280 — 752T side is an estimate until first measured
-on real 752T hardware (then update the threshold here).
+Single-die fp16 matmul peak on the 560T SKU: ~230-250 TFLOPS (measured);
+752T SKU expected ~320. Classification threshold 280 — the 752T side is an
+estimate until first measured on real 752T hardware (then update the constant).
 
 NOTE: real compute load (~seconds). Do not run while other jobs occupy the chip.
 """
