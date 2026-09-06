@@ -130,12 +130,20 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   `export HF_ENDPOINT=https://hf-mirror.com` 后用 `hf download` 直连即可。
   注意：新版 `hf` CLI 参数是 `--local-dir`（连字符）；宿主机通常没装
   huggingface_hub，在容器里执行。
+- **蓝区 pip 先配全局国内源，禁止先试默认源**：pypi.org 直连是长时间挂死
+  而非快速报错，"先试一遍默认"每次白等数分钟。容器内装任何包之前先配一次
+  `pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ &&
+  pip config set install.trusted-host mirrors.aliyun.com`，之后一切 pip 命令
+  （-e 安装、requirements、临时补装小包）自动带源；命令示例里显式写 `-i`
+  只是未配全局时的兜底写法。SSH 隧道代理是 git/curl 等小流量的备选，
+  不是 pip 的首选。
 - **蓝区代理穿透**：蓝区服务器无法直接访问外网 PyPI/docker 等。标准做法
   是用 SSH 反向端口转发，把本地代理（如端口 7897）映射到远端：
   `ssh -R 7897:127.0.0.1:7897 {user}@{host} -f -N`
   建好后在容器内设 `HTTP_PROXY=http://127.0.0.1:7897` 即可走本地代理出网。
   隧道易超时断开，操作前先检查远端端口是否在监听（`ss -tlnp | grep 7897`），
-  发现断了就重建。此方式仅适用于用户本地代理正在运行且能访问目标源。
+  发现断了就重建。此方式仅适用于用户本地代理正在运行且能访问目标源；
+  适用对象是 git fetch 等小流量，pip 优先走国内镜像源（见上条）。
 - **G 区下载三坑（MITM 自签 / NFS 直写卡死 / pkill 自杀）**：仅限 G 区环境
   （深信服 MITM 代理 + NFS 大盘）。Python requests 需关 SSL 校验（pip 能过
   是 trusted-host 所致，不代表没被 MITM）；大文件勿直写 NFS——先下容器本地
@@ -295,7 +303,7 @@ examples/disaggregated_prefill_v1 自带 proxy 脚本）。
 
 两步：vllm/ 仓根 `VLLM_TARGET_DEVICE=empty pip install -v -e . --no-build-isolation`
 （先 `pip uninstall vllm vllm-ascend -y`，版本配套一律查 `.github/vllm-main-verified.commit` 取 commit id，勿按 release tag 配套）；
-vllm-ascend/ 仓根同法装，蓝区加 `-i https://mirrors.aliyun.com/pypi/simple/`。
+vllm-ascend/ 仓根同法装；蓝区先配全局 pip 国内源（见经验备忘），所有安装命令统一走源。
 
 > 触发场景：源码安装/升级 vllm-ascend、bisect 切版本、镜像内版本不满足需求
 > 详见 `~/.blue_server_toolkit/docs/vllm-ascend-build.md`（命令速查 + 按报错关键字 FAQ）
