@@ -5,6 +5,19 @@
 
 在 vllm/ 和 vllm-ascend/ 仓根分别执行，容器内操作。
 
+## 源规则（蓝区先配全局，别先试默认）
+
+pypi.org 蓝区直连是长时间挂死而非快速报错，不要"先试一遍默认源"。装任何包
+之前先配一次全局源，之后一切 pip 命令（-e 安装、requirements、临时补装小包）
+自动带源：
+
+```bash
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+pip config set install.trusted-host mirrors.aliyun.com
+```
+
+下文命令里显式写的 `-i` 是未配全局时的兜底写法。
+
 ## 版本配套（装 vllm 前先查）
 
 **一律以 `.github/vllm-main-verified.commit` 里的 commit id 为准**（vllm main 上被 CI 验证的配套 commit，PR/每日测试都 checkout 它），vllm 仓直接 `git checkout <commit id>`（detached）：
@@ -22,7 +35,7 @@ grep -E 'main_vllm_(commit|tag)' docs/source/conf.py    # 旧版
 ```bash
 # 1. vllm（vllm/ 仓根）
 pip uninstall vllm vllm-ascend -y    # 镜像预装的先卸，否则 pip 跳过安装
-VLLM_TARGET_DEVICE=empty pip install -v -e . --no-build-isolation
+VLLM_TARGET_DEVICE=empty pip install -v -e . --no-build-isolation -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 
 # 2. vllm-ascend（vllm-ascend/ 仓根，蓝区源）
 pip install -v -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
@@ -38,7 +51,7 @@ python -c "import vllm_ascend; print(vllm_ascend.__version__)"
 
 | 报错 | 解法 |
 |------|------|
-| `No module named setuptools_rust`（装 vllm 时） | `pip install setuptools-rust`，只装这一个，装完重跑安装命令 |
+| `No module named setuptools_rust`（装 vllm 时） | `pip install setuptools-rust -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com`，只装这一个，装完重跑安装命令 |
 | `cp: cannot create regular file '/mc2/...'` | `sed -i 's/\$SCRIPT_DIR/\$ROOT_DIR/g' csrc/build_aclnn.sh` 后重装 |
 | `Stale file handle` / CPack 缺 `CANN-custom_ops*.run` | `rm -rf csrc/build build`（CPack 场景再加 `csrc/output`）后重装 |
 | `CMakeCache.txt ... is different than the directory`（从其他任务目录 cp 来的仓） | 缓存写死了旧仓绝对路径，`rm -rf csrc/build csrc/output build` 后重装 |
