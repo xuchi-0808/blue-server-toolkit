@@ -40,7 +40,7 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 # 如果 skill 源码仓在本地可用（用户已 clone）
 SKILL_DIR="$HOME/.blue_server_toolkit"
 mkdir -p "$SKILL_DIR/scripts" "$SKILL_DIR/docs"
-cp scripts/*.sh "$SKILL_DIR/scripts/"
+cp scripts/*.sh scripts/*.py "$SKILL_DIR/scripts/" 2>/dev/null
 cp docs/*.md "$SKILL_DIR/docs/"
 echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
 ```
