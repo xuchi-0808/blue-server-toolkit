@@ -20,6 +20,7 @@ pip config set install.trusted-host mirrors.aliyun.com
 
 ## 版本配套（装 vllm 前先查）
 
+<<<<<<< HEAD
 **一律以 `.github/vllm-main-verified.commit` 里的 commit id 为准**（vllm main 上被 CI 验证的配套 commit，PR/每日测试都 checkout 它），vllm 仓直接 `git checkout <commit id>`（detached）：
 
 ```bash
@@ -32,6 +33,24 @@ grep -E 'main_vllm_(commit|tag)' docs/source/conf.py    # 旧版
 > main2main 真实锚点可用 `git log -S "<新引入的 vllm API>" -- vllm_ascend/` 定位（提交信息里写明锚点 SHA）。
 > 配错版本的典型症状：serve 启动导入期 `AttributeError: VllmConfig has no attribute '_get_v1_model_runner_unsupported_features'`
 >（补丁层引用新 vllm 才有的 API），`import vllm, vllm_ascend` 不触发补丁测不出来——**必须起一次 serve 才暴露**。
+=======
+新版查 **`.github/vllm-main-verified.commit`**（内容是 vllm 的 commit id），在 vllm/ 仓根
+`git checkout <verified_commit_id>` 切到对应 commit。**禁止用 tag 匹配代码**：tag 落点与
+验证过的 commit 不保证一致，有小概率配错；配套必须精确到 commit id。
+
+```bash
+cat .github/vllm-main-verified.commit                   # 新版：vllm 的 verified commit id
+git checkout $(cat .github/vllm-main-verified.commit)   # vllm/ 仓根执行
+grep -E 'main_vllm_(commit|tag)' docs/source/conf.py    # 旧版
+```
+
+> **坑（2026-09 实测）**：vllm-ascend main 与 vllm 的真实配对以 **main2main 锚点**为准
+> （`git log -S "<新引入的 vllm API>" -- vllm_ascend/` 可定位升级提交，提交信息里写明锚点 SHA），
+> tag / `.github/vllm-release-tag.commit` 都可能滞后于最近一次 main2main 升级而失真。
+> 用旧 vllm 配新 vllm-ascend 的典型症状：serve 启动导入期 `AttributeError: VllmConfig has no
+> attribute '_get_v1_model_runner_unsupported_features'`（补丁层引用新 vllm 才有的 API），
+> 且 `import vllm, vllm_ascend` 不触发补丁所以测不出来——**必须起一次 serve 才暴露**。
+>>>>>>> a8badbc (docs(vllm-ascend): pair vllm via vllm-main-verified.commit checkout, forbid tag matching)
 > 升级 vllm 重装时若 pip 想动 torch/torch_npu/triton-ascend，改用 `--no-deps`（镜像依赖视为已满足）。
 
 ## 安装
