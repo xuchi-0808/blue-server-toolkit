@@ -43,8 +43,10 @@ pip install -v -e . --no-build-isolation -i https://mirrors.aliyun.com/pypi/simp
 # Y/G 区内网改用：--extra-index-url https://triton-ascend.osinfra.cn/pypi/simple
 
 # 3. 验证
-python -c "import vllm; print(vllm.__version__)"
-python -c "import vllm_ascend; print(vllm_ascend.__version__)"
+python -c "import vllm; print(vllm.__version__, vllm.__file__)"
+# 新版 main 已删除 vllm_ascend.__version__ 属性，版本只读包 metadata（用 __version__ 会误报 AttributeError）
+python -c "import vllm_ascend, importlib.metadata as m; print(m.version('vllm-ascend'), vllm_ascend.__file__)"
+# __file__ 应指向 -e 安装的源码目录（pip show 的 Location 恒显示 site-packages，不能作为 editable 判据）
 ```
 
 ## FAQ（按报错关键字）
