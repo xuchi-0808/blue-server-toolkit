@@ -93,7 +93,7 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
 
 | 归属 | 位置 | 内容 |
 |------|------|------|
-| Skill 本体（git 仓） | 本仓 `SKILL.md` / `docs/` | 命令模板、通用踩坑、机型/驱动知识 |
+| Skill 本体（git 仓） | 本仓 `SKILL.md` / `docs/` | 命令模板、经验备忘、机型/驱动知识 |
 | 用户配置（本地） | `~/.blue_server_toolkit/config.json` | 机器清单（IP/账号/容器）、目录约定、命令限制 |
 | 用户笔记（本地） | `~/.blue_server_toolkit/notes/` | 机器档案（磁盘/HBM/共享情况）、权重清单、环境变更历史 |
 
@@ -142,7 +142,7 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   `ssh -R 7897:127.0.0.1:7897 {user}@{host} -f -N`
   建好后在容器内设 `HTTP_PROXY=http://127.0.0.1:7897` 即可走本地代理出网。
   隧道易超时断开，操作前先检查远端端口是否在监听（`ss -tlnp | grep 7897`），
-  发现断了就重建。此方式仅适用于用户本地代理正在运行且能访问目标源；
+  断了就重建。此方式仅适用于用户本地代理正在运行且能访问目标源；
   适用对象是 git fetch 等小流量，pip 优先走国内镜像源（见上条）。
 - **G 区下载三坑（MITM 自签 / NFS 直写卡死 / pkill 自杀）**：仅限 G 区环境
   （深信服 MITM 代理 + NFS 大盘）。Python requests 需关 SSL 校验（pip 能过
@@ -243,9 +243,9 @@ vllm-ascend 镜像常用来源（拉大镜像时优先直连/内网源，**禁�
 
 | 源 | 地址 | 说明 |
 |----|------|------|
-| 官方 | `quay.io/ascend/vllm-ascend` | 海外源，蓝区直连很慢（实测 ~0.2MB/s） |
-| 南大镜像 | `quay.nju.edu.cn/ascend/vllm-ascend` | 国内镜像，蓝区直连实测 ~18MB/s，推荐 |
-| 华为内网 | `cr.rnd.huawei.com/images/vllm-ascend` | 同事反馈最快；需 rnd 内网 DNS/路由，蓝区当前 VPN 不可达 |
+| 官方 | `quay.io/ascend/vllm-ascend` | 海外源，蓝区直连 ~0.2MB/s，不推荐 |
+| 南大镜像 | `quay.nju.edu.cn/ascend/vllm-ascend` | 国内镜像，直连 ~18MB/s，**蓝区首选** |
+| 华为内网 | `cr.rnd.huawei.com/images/vllm-ascend` | 速度最快（未验证）；需 rnd 内网 DNS/路由，蓝区当前 VPN 不可达 |
 
 ```bash
 # 南大镜像拉取 + 重打官方 tag
@@ -253,7 +253,7 @@ docker pull quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3
 docker tag quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3 quay.io/ascend/vllm-ascend:nightly-main-a3
 ```
 
-> 踩坑：docker daemon 若配了 systemd 代理（`/etc/systemd/system/docker.service.d/proxy.conf`），
+> 注意：docker daemon 若配了 systemd 代理（`/etc/systemd/system/docker.service.d/proxy.conf`），
 > 所有 registry 请求都会走代理；改用直连内网源时需要临时调整 NO_PROXY 并重启 dockerd
 > （`live-restore=true` 时容器不中断）。详见 `docs/image-mirrors.md`。
 
