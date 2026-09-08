@@ -132,7 +132,7 @@ dnf install -y "kernel-devel-$(uname -r)"
 
 报 `ERR_NO:0x0091; ERR_DES:HwHiAiUser not exists`。见第 1 步，先建用户再装驱动。
 
-## 版本对应（实测）
+## 版本对应
 
 | 组件 | 版本 |
 |------|------|
