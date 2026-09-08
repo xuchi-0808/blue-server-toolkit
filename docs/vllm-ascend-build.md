@@ -29,6 +29,10 @@ grep -E 'main_vllm_(commit|tag)' docs/source/conf.py    # 旧版
 ```
 
 > 踩坑：按 release-tag 给 vllm-ascend main 配套 vllm 会配错版本——tag 停在发布点，main-verified 随 main 演进更新，两者常不同点（实际踩过）。
+> main2main 真实锚点可用 `git log -S "<新引入的 vllm API>" -- vllm_ascend/` 定位（提交信息里写明锚点 SHA）。
+> 配错版本的典型症状：serve 启动导入期 `AttributeError: VllmConfig has no attribute '_get_v1_model_runner_unsupported_features'`
+>（补丁层引用新 vllm 才有的 API），`import vllm, vllm_ascend` 不触发补丁测不出来——**必须起一次 serve 才暴露**。
+> 升级 vllm 重装时若 pip 想动 torch/torch_npu/triton-ascend，改用 `--no-deps`（镜像依赖视为已满足）。
 
 ## 安装
 
