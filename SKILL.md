@@ -157,8 +157,8 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   safe.directory <repo>` 逐个打补丁，不如 chown 干净）。
 - **A3 机型算力判定（560T/752T）**：宿主机一般没装 torch，去任一 vllm 镜像容器
   里跑 `flops-torch.py`（stdin 管道进容器，服务器零落盘，用法见脚本索引）。
-  单 die fp16 matmul 峰值：560T 机型实测 ~230-250 TFLOPS；752T 预估 ~320
-  （阈值 280，待真机标定后更新脚本常量）。真实压测（数秒、数百瓦），
+  单 die fp16 matmul 峰值：560T 机型实测 ~230-250 TFLOPS；752T 实测 ~297-322
+  （阈值 280；752T 侧 2026-08-30 真机标定）。真实压测（数秒、数百瓦），
   die 被占用时勿跑。
 
 ## 命令参考
