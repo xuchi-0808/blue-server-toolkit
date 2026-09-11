@@ -6,8 +6,8 @@ nothing written server-side); uses the first NPU die visible to the container:
   ssh {user}@{host} "docker exec -i {container} python3 -" < flops-torch.py
 
 Single-die fp16 matmul peak on the 560T SKU: ~230-250 TFLOPS (measured);
-752T SKU expected ~320. Classification threshold 280 — the 752T side is an
-estimate until first measured on real 752T hardware (then update the constant).
+752T SKU: ~297-322 TFLOPS (first measured 2026-08-30, Atlas 800I A3 node).
+Classification threshold 280.
 
 NOTE: real compute load (~seconds). Do not run while other jobs occupy the chip.
 """
@@ -41,4 +41,4 @@ for m, iters in [(4096, 600), (8192, 200), (16384, 50)]:
     print(f"matmul {m}^3 fp16: {tf:6.1f} TFLOPS")
 print(f"PEAK fp16 matmul: {best:.1f} TFLOPS")
 kind = "752T" if best >= THRESHOLD_752T else "560T"
-print(f"=> A3 {kind} machine (560T ~230-250 measured / 752T ~320 est., threshold {THRESHOLD_752T})")
+print(f"=> A3 {kind} machine (560T ~230-250 / 752T ~297-322 measured, threshold {THRESHOLD_752T})")
