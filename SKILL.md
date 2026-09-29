@@ -294,7 +294,7 @@ examples/disaggregated_prefill_v1 自带 proxy 脚本）。
 ### vllm-ascend 源码编译
 
 两步：vllm/ 仓根 `VLLM_TARGET_DEVICE=empty pip install -v -e . --no-build-isolation`
-（先 `pip uninstall vllm vllm-ascend -y`，版本配套查 `.github/vllm-release-tag.commit`）；
+（先 `pip uninstall vllm vllm-ascend -y`，版本配套一律查 `.github/vllm-main-verified.commit` 取 commit id，勿按 release tag 配套）；
 vllm-ascend/ 仓根同法装，蓝区加 `-i https://mirrors.aliyun.com/pypi/simple/`。
 
 > 触发场景：源码安装/升级 vllm-ascend、bisect 切版本、镜像内版本不满足需求
