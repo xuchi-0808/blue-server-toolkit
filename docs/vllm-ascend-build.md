@@ -7,10 +7,15 @@
 
 ## 版本配套（装 vllm 前先查）
 
+**一律以 `.github/vllm-main-verified.commit` 里的 commit id 为准**（vllm main 上被 CI 验证的配套 commit，PR/每日测试都 checkout 它），vllm 仓直接 `git checkout <commit id>`（detached）：
+
 ```bash
-cat .github/vllm-release-tag.commit                     # 新版：vllm 的 git tag
+cat .github/vllm-main-verified.commit   # 配套 vllm 的 commit id —— 唯一依据
+cat .github/vllm-release-tag.commit     # 仅 release 场景参考的 vllm tag
 grep -E 'main_vllm_(commit|tag)' docs/source/conf.py    # 旧版
 ```
+
+> 踩坑：按 release-tag 给 vllm-ascend main 配套 vllm 会配错版本——tag 停在发布点，main-verified 随 main 演进更新，两者常不同点（实际踩过）。
 
 ## 安装
 
