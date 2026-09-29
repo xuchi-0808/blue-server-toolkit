@@ -5,6 +5,9 @@
 
 在 vllm/ 和 vllm-ascend/ 仓根分别执行，容器内操作。
 
+> 编译安装是纯 CPU 操作，**不需要 NPU 空闲**——过程中不用查 NPU 状态、不用等机器空闲；
+> 空闲判断（npu-smi）只在编译完成后起服务/压测时才相关。
+
 ## 版本配套（装 vllm 前先查）
 
 **一律以 `.github/vllm-main-verified.commit` 里的 commit id 为准**（vllm main 上被 CI 验证的配套 commit，PR/每日测试都 checkout 它），vllm 仓直接 `git checkout <commit id>`（detached）：
@@ -16,6 +19,16 @@ grep -E 'main_vllm_(commit|tag)' docs/source/conf.py    # 旧版
 ```
 
 > 踩坑：按 release-tag 给 vllm-ascend main 配套 vllm 会配错版本——tag 停在发布点，main-verified 随 main 演进更新，两者常不同点（实际踩过）。
+
+## 编译前置（必查 setuptools）
+
+`--no-build-isolation` 直接用环境自带的 setuptools，而镜像里常停留在旧版本
+（68/75 时代），是编译安装的**最高频失败点**，报错五花八门且难懂。装 vllm 前先查，旧就升：
+
+```bash
+python -c "import setuptools; print(setuptools.__version__)"   # < 77 建议升（vllm main 要求 ≥77）
+pip install -U setuptools
+```
 
 ## 安装
 
@@ -38,6 +51,7 @@ python -c "import vllm_ascend; print(vllm_ascend.__version__)"
 
 | 报错 | 解法 |
 |------|------|
+| `Metadata generation failed` 等 setuptools 相关怪错 | 回「编译前置」升 setuptools 后重跑 |
 | `No module named setuptools_rust`（装 vllm 时） | `pip install setuptools-rust`，只装这一个，装完重跑安装命令 |
 | `cp: cannot create regular file '/mc2/...'` | `sed -i 's/\$SCRIPT_DIR/\$ROOT_DIR/g' csrc/build_aclnn.sh` 后重装 |
 | `Stale file handle` / CPack 缺 `CANN-custom_ops*.run` | `rm -rf csrc/build build`（CPack 场景再加 `csrc/output`）后重装 |

@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.17.0
+  version: 1.17.1
 ---
 
 # Blue Server Toolkit
@@ -296,6 +296,8 @@ examples/disaggregated_prefill_v1 自带 proxy 脚本）。
 两步：vllm/ 仓根 `VLLM_TARGET_DEVICE=empty pip install -v -e . --no-build-isolation`
 （先 `pip uninstall vllm vllm-ascend -y`，版本配套一律查 `.github/vllm-main-verified.commit` 取 commit id，勿按 release tag 配套）；
 vllm-ascend/ 仓根同法装，蓝区加 `-i https://mirrors.aliyun.com/pypi/simple/`。
+装前**先查 setuptools**（`--no-build-isolation` 用环境自带版本，过旧是最高频失败点，<77 就升）；
+编译纯 CPU，**不需要 NPU 空闲**，过程中不用查 NPU 状态。
 
 > 触发场景：源码安装/升级 vllm-ascend、bisect 切版本、镜像内版本不满足需求
 > 详见 `~/.blue_server_toolkit/docs/vllm-ascend-build.md`（命令速查 + 按报错关键字 FAQ）
