@@ -8,7 +8,7 @@ description: >-
   see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.16.1
+  version: 1.17.0
 ---
 
 # Blue Server Toolkit
@@ -136,6 +136,11 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   建好后在容器内设 `HTTP_PROXY=http://127.0.0.1:7897` 即可走本地代理出网。
   隧道易超时断开，操作前先检查远端端口是否在监听（`ss -tlnp | grep 7897`），
   发现断了就重建。此方式仅适用于用户本地代理正在运行且能访问目标源。
+- **G 区下载三坑（MITM 自签 / NFS 直写卡死 / pkill 自杀）**：仅限 G 区环境
+  （深信服 MITM 代理 + NFS 大盘）。Python requests 需关 SSL 校验（pip 能过
+  是 trusted-host 所致，不代表没被 MITM）；大文件勿直写 NFS——先下容器本地
+  /tmp、循环断点续传、校验字节数后 mv；pkill -f 模式勿与命令行里的路径
+  字面量重叠。详见 `~/.blue_server_toolkit/docs/gzone-download.md`
 - **命令输出重定向到日志文件再看**：长/复杂命令在
   远端执行时，输出重定向到日志文件，然后分段查看（`tail -N`/`grep`）：
   `cmd > /tmp/xxx.log 2>&1; echo EXIT=$?` 后再 `tail -40 /tmp/xxx.log`。
@@ -326,6 +331,12 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 
 > 触发场景：docker pull 慢/失败、蓝区拉镜像、镜像源切换
 > 详见 `~/.blue_server_toolkit/docs/image-mirrors.md`
+
+### G 区大文件下载
+
+> 触发场景：G 区机器下载模型/大文件、Python 报 self-signed certificate、下载中途冻结僵死、pkill 退出码 143
+> **仅适用 G 区环境**（深信服 MITM 代理 + NFS 大盘），其他环境勿套用
+> 详见 `~/.blue_server_toolkit/docs/gzone-download.md`
 
 ## 安全限制
 
