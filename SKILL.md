@@ -2,13 +2,13 @@
 name: blue-server-toolkit
 description: >-
   Use when operating remote development servers (Ascend NPU blue-zone servers).
-  Covers connection checks, code sync, UT execution, model downloads, log viewing,
-  container management, and file sync. For advanced topics (NPU process cleanup,
-  A3 chip numbering, vLLM service management, Graph debugging, HDK installation),
-  see docs/ directory.
+  Covers connection checks and stability (SSH multiplexing), code sync, UT execution,
+  model downloads, log viewing, container management, and file sync. For advanced
+  topics (NPU process cleanup, A3 chip numbering, vLLM service management, Graph
+  debugging, HDK installation), see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.17.0
+  version: 2.0.0
 ---
 
 # Blue Server Toolkit
@@ -149,6 +149,12 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   是 trusted-host 所致，不代表没被 MITM）；大文件勿直写 NFS——先下容器本地
   /tmp、循环断点续传、校验字节数后 mv；pkill -f 模式勿与命令行里的路径
   字面量重叠。详见 `~/.blue_server_toolkit/docs/gzone-download.md`
+- **SSH 批量短命令间歇超时，用 ControlMaster 复用而非裸重试**：网络抖动窗口只丢
+  「新建连接」的 SYN，已建立的长连接不受影响——终端稳、逐命令新建连接的程序
+  间歇超时，就是这个差异。`~/.ssh/config` 对目标网段配 `ControlMaster auto` +
+  `ControlPersist 8h` + `ServerAliveInterval 30`，首条命令建常驻 master，后续
+  ssh/scp/rsync 全复用（单条 ~0.8s → ~0.1s）。维护 `ssh -O check` / `ssh -O exit`；
+  master 判死后下条命令自动重拨。详见 `~/.blue_server_toolkit/docs/ssh-connection-stability.md`
 - **命令输出重定向到日志文件再看**：长/复杂命令在
   远端执行时，输出重定向到日志文件，然后分段查看（`tail -N`/`grep`）：
   `cmd > <日志路径> 2>&1; echo EXIT=$?` 后再 `tail -40 <日志路径>`。
@@ -185,6 +191,7 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
 | 操作 | 命令 |
 |------|------|
 | SSH 心跳 | `ssh -o ConnectTimeout=5 {user}@{host} "echo OK"` |
+| SSH master 状态 | `ssh -O check {user}@{host}`（需已配 ControlMaster，见 docs/ssh-connection-stability.md） |
 | NPU 状态 | `bash ~/.blue_server_toolkit/scripts/check-npu.sh {host} {user} [{container}]` |
 | 磁盘空间 | `ssh {user}@{host} "df -h"` |
 
@@ -261,6 +268,16 @@ docker tag quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3 quay.io/ascend/vll
 
 以下内容需要查阅 `docs/` 目录中的专项文档。每个条目包含触发条件和核心规则，
 确保不读 docs 也不会犯致命错误。
+
+### SSH 连接稳定性（ControlMaster 复用）
+
+批量短命令/AI 代理场景的 SSH 间歇超时，根因是抖动窗口丢「新建连接」的 SYN——
+用 ControlMaster 把所有命令复用到一条常驻连接上（纯客户端配置，服务器零改动）。
+配置模板、master 维护（`-O check`/`-O exit`）、自动重拨语义、MaxSessions
+并发上限注意事项、TCP/sshd 分层排查范式。
+
+> 触发场景：ssh/scp/rsync 间歇超时、批量命令频繁重试、AI 代理逐命令建连、网络施工期、终端稳但自动化不稳
+> 详见 `~/.blue_server_toolkit/docs/ssh-connection-stability.md`
 
 ### NPU 进程清理与 HBM 释放
 
