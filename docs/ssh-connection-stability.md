@@ -7,6 +7,12 @@
 
 ## 配置（纯客户端，服务器零改动）
 
+> **平台限制（2026-10-07 实测）**：ControlMaster 仅限 **Linux/macOS 客户端**。Windows 上两路皆不通——
+> Win32 OpenSSH（System32\OpenSSH）完全不支持 mux；Git Bash 的 MSYS2 ssh 能建 master、`-O check` 正常，
+> 但 mux 会话通道必被重置（`mux_client_request_session: read from master failed: Connection reset by peer`，
+> 靠"复用失败降级直连"伪装成功，实际没复用）。Windows 客户端退而求其次：只配 `ServerAliveInterval 30` +
+> `ServerAliveCountMax 6` 保活（防空闲断连有效，防抖动无效），批量短命令场景改用脚本内单连接循环。
+
 `~/.ssh/config` 按目标网段追加（替换为实际网段）：
 
 ```
