@@ -36,7 +36,7 @@ fi
 # Copy scripts if source directory is available
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 if [ -d "$SCRIPT_DIR" ] && [ "$SCRIPT_DIR" != "$CONFIG_DIR/scripts" ]; then
-  cp "$SCRIPT_DIR"/*.sh "$CONFIG_DIR/scripts/" 2>/dev/null && echo "✅ Scripts installed to $CONFIG_DIR/scripts/"
+  cp "$SCRIPT_DIR"/*.sh "$SCRIPT_DIR"/*.py "$CONFIG_DIR/scripts/" 2>/dev/null && echo "✅ Scripts installed to $CONFIG_DIR/scripts/"
 fi
 
 # Copy docs if source directory is available
