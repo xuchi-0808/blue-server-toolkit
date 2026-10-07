@@ -2,13 +2,13 @@
 name: blue-server-toolkit
 description: >-
   Use when operating remote development servers (Ascend NPU blue-zone servers).
-  Covers connection checks, code sync, UT execution, model downloads, log viewing,
-  container management, and file sync. For advanced topics (NPU process cleanup,
-  A3 chip numbering, vLLM service management, Graph debugging, HDK installation),
-  see docs/ directory.
+  Covers connection checks and stability (SSH multiplexing), code sync, UT execution,
+  model downloads, log viewing, container management, and file sync. For advanced
+  topics (NPU process cleanup, A3 chip numbering, vLLM service management, Graph
+  debugging, HDK installation), see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 1.17.1
+  version: 2.0.0
 ---
 
 # Blue Server Toolkit
@@ -40,7 +40,7 @@ ssh {user}@{host} "docker exec {container} bash -c '{command}'"
 # 如果 skill 源码仓在本地可用（用户已 clone）
 SKILL_DIR="$HOME/.blue_server_toolkit"
 mkdir -p "$SKILL_DIR/scripts" "$SKILL_DIR/docs"
-cp scripts/*.sh "$SKILL_DIR/scripts/"
+cp scripts/*.sh scripts/*.py "$SKILL_DIR/scripts/" 2>/dev/null
 cp docs/*.md "$SKILL_DIR/docs/"
 echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
 ```
@@ -93,7 +93,7 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
 
 | 归属 | 位置 | 内容 |
 |------|------|------|
-| Skill 本体（git 仓） | 本仓 `SKILL.md` / `docs/` | 命令模板、通用踩坑、机型/驱动知识 |
+| Skill 本体（git 仓） | 本仓 `SKILL.md` / `docs/` | 命令模板、经验备忘、机型/驱动知识 |
 | 用户配置（本地） | `~/.blue_server_toolkit/config.json` | 机器清单（IP/账号/容器）、目录约定、命令限制 |
 | 用户笔记（本地） | `~/.blue_server_toolkit/notes/` | 机器档案（磁盘/HBM/共享情况）、权重清单、环境变更历史 |
 
@@ -130,22 +130,39 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   `export HF_ENDPOINT=https://hf-mirror.com` 后用 `hf download` 直连即可。
   注意：新版 `hf` CLI 参数是 `--local-dir`（连字符）；宿主机通常没装
   huggingface_hub，在容器里执行。
+- **蓝区 pip 先配全局国内源，禁止先试默认源**：pypi.org 直连是长时间挂死
+  而非快速报错，"先试一遍默认"每次白等数分钟。容器内装任何包之前先配一次
+  `pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ &&
+  pip config set install.trusted-host mirrors.aliyun.com`，之后一切 pip 命令
+  （-e 安装、requirements、临时补装小包）自动带源；命令示例里显式写 `-i`
+  只是未配全局时的兜底写法。SSH 隧道代理是 git/curl 等小流量的备选，
+  不是 pip 的首选。
 - **蓝区代理穿透**：蓝区服务器无法直接访问外网 PyPI/docker 等。标准做法
   是用 SSH 反向端口转发，把本地代理（如端口 7897）映射到远端：
   `ssh -R 7897:127.0.0.1:7897 {user}@{host} -f -N`
   建好后在容器内设 `HTTP_PROXY=http://127.0.0.1:7897` 即可走本地代理出网。
   隧道易超时断开，操作前先检查远端端口是否在监听（`ss -tlnp | grep 7897`），
-  发现断了就重建。此方式仅适用于用户本地代理正在运行且能访问目标源。
+  断了就重建。此方式仅适用于用户本地代理正在运行且能访问目标源；
+  适用对象是 git fetch 等小流量，pip 优先走国内镜像源（见上条）。
 - **G 区下载三坑（MITM 自签 / NFS 直写卡死 / pkill 自杀）**：仅限 G 区环境
   （深信服 MITM 代理 + NFS 大盘）。Python requests 需关 SSL 校验（pip 能过
   是 trusted-host 所致，不代表没被 MITM）；大文件勿直写 NFS——先下容器本地
   /tmp、循环断点续传、校验字节数后 mv；pkill -f 模式勿与命令行里的路径
   字面量重叠。详见 `~/.blue_server_toolkit/docs/gzone-download.md`
+- **SSH 批量短命令间歇超时，用 ControlMaster 复用而非裸重试**：网络抖动窗口只丢
+  「新建连接」的 SYN，已建立的长连接不受影响——终端稳、逐命令新建连接的程序
+  间歇超时，就是这个差异。`~/.ssh/config` 对目标网段配 `ControlMaster auto` +
+  `ControlPersist 8h` + `ServerAliveInterval 30`，首条命令建常驻 master，后续
+  ssh/scp/rsync 全复用（单条 ~0.8s → ~0.1s）。维护 `ssh -O check` / `ssh -O exit`；
+  master 判死后下条命令自动重拨。详见 `~/.blue_server_toolkit/docs/ssh-connection-stability.md`
 - **命令输出重定向到日志文件再看**：长/复杂命令在
   远端执行时，输出重定向到日志文件，然后分段查看（`tail -N`/`grep`）：
-  `cmd > /tmp/xxx.log 2>&1; echo EXIT=$?` 后再 `tail -40 /tmp/xxx.log`。
-  **不要**用 `| tail -N` 截断 stdout——会丢失错误上下文，且管道让 `$?`
-  失效（pip 失败也显示成功），错误排查全靠猜。
+  `cmd > <日志路径> 2>&1; echo EXIT=$?` 后再 `tail -40 <日志路径>`。
+  日志落点：**用户指定过服务器工作目录的，放该工作目录下**，
+  不要丢进 /tmp、~ 等公共位置；未指定工作目录时放 `/tmp/<任务名>/`
+  任务子目录（先 `mkdir -p`），与其他任务的日志隔开，不要直接堆在
+  /tmp 根下。**不要**用 `| tail -N` 截断 stdout——会丢失错误上下文，
+  且管道让 `$?` 失效（pip 失败也显示成功），错误排查全靠猜。
 - **一次只做一个动作，不要顺手多做**：缺什么依赖就
   只装什么（如只 `pip install setuptools-rust`），不要"顺手"把相关包全装了
   ——多余动作可能引入网络/版本新失败源，且失败时难以定位。每一步确认
@@ -174,6 +191,7 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
 | 操作 | 命令 |
 |------|------|
 | SSH 心跳 | `ssh -o ConnectTimeout=5 {user}@{host} "echo OK"` |
+| SSH master 状态 | `ssh -O check {user}@{host}`（需已配 ControlMaster，见 docs/ssh-connection-stability.md） |
 | NPU 状态 | `bash ~/.blue_server_toolkit/scripts/check-npu.sh {host} {user} [{container}]` |
 | 磁盘空间 | `ssh {user}@{host} "df -h"` |
 
@@ -232,9 +250,9 @@ vllm-ascend 镜像常用来源（拉大镜像时优先直连/内网源，**禁�
 
 | 源 | 地址 | 说明 |
 |----|------|------|
-| 官方 | `quay.io/ascend/vllm-ascend` | 海外源，蓝区直连很慢（实测 ~0.2MB/s） |
-| 南大镜像 | `quay.nju.edu.cn/ascend/vllm-ascend` | 国内镜像，蓝区直连实测 ~18MB/s，推荐 |
-| 华为内网 | `cr.rnd.huawei.com/images/vllm-ascend` | 同事反馈最快；需 rnd 内网 DNS/路由，蓝区当前 VPN 不可达 |
+| 官方 | `quay.io/ascend/vllm-ascend` | 海外源，蓝区直连 ~0.2MB/s，不推荐 |
+| 南大镜像 | `quay.nju.edu.cn/ascend/vllm-ascend` | 国内镜像，直连 ~18MB/s，**蓝区首选** |
+| 华为内网 | `cr.rnd.huawei.com/images/vllm-ascend` | 速度最快（未验证）；需 rnd 内网 DNS/路由，蓝区当前 VPN 不可达 |
 
 ```bash
 # 南大镜像拉取 + 重打官方 tag
@@ -242,7 +260,7 @@ docker pull quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3
 docker tag quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3 quay.io/ascend/vllm-ascend:nightly-main-a3
 ```
 
-> 踩坑：docker daemon 若配了 systemd 代理（`/etc/systemd/system/docker.service.d/proxy.conf`），
+> 注意：docker daemon 若配了 systemd 代理（`/etc/systemd/system/docker.service.d/proxy.conf`），
 > 所有 registry 请求都会走代理；改用直连内网源时需要临时调整 NO_PROXY 并重启 dockerd
 > （`live-restore=true` 时容器不中断）。详见 `docs/image-mirrors.md`。
 
@@ -250,6 +268,16 @@ docker tag quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3 quay.io/ascend/vll
 
 以下内容需要查阅 `docs/` 目录中的专项文档。每个条目包含触发条件和核心规则，
 确保不读 docs 也不会犯致命错误。
+
+### SSH 连接稳定性（ControlMaster 复用）
+
+批量短命令/AI 代理场景的 SSH 间歇超时，根因是抖动窗口丢「新建连接」的 SYN——
+用 ControlMaster 把所有命令复用到一条常驻连接上（纯客户端配置，服务器零改动）。
+配置模板、master 维护（`-O check`/`-O exit`）、自动重拨语义、MaxSessions
+并发上限注意事项、TCP/sshd 分层排查范式。
+
+> 触发场景：ssh/scp/rsync 间歇超时、批量命令频繁重试、AI 代理逐命令建连、网络施工期、终端稳但自动化不稳
+> 详见 `~/.blue_server_toolkit/docs/ssh-connection-stability.md`
 
 ### NPU 进程清理与 HBM 释放
 
@@ -295,7 +323,8 @@ examples/disaggregated_prefill_v1 自带 proxy 脚本）。
 
 两步：vllm/ 仓根 `VLLM_TARGET_DEVICE=empty pip install -v -e . --no-build-isolation`
 （先 `pip uninstall vllm vllm-ascend -y`，版本配套一律查 `.github/vllm-main-verified.commit` 取 commit id，勿按 release tag 配套）；
-vllm-ascend/ 仓根同法装，蓝区加 `-i https://mirrors.aliyun.com/pypi/simple/`。
+vllm-ascend/ 仓根同法装；蓝区先配全局 pip 国内源（见经验备忘），所有安装命令统一走源
+（未配全局时兜底加 `-i https://mirrors.aliyun.com/pypi/simple/`）。
 装前**先查 setuptools**（`--no-build-isolation` 用环境自带版本，过旧是最高频失败点，<77 就升）；
 编译纯 CPU，**不需要 NPU 空闲**，过程中不用查 NPU 状态。
 
