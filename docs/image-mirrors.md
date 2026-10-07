@@ -2,13 +2,13 @@
 
 ## 常用镜像源
 
-| 源 | 镜像地址 | 实测（蓝区直连） | 说明 |
+| 源 | 镜像地址 | 蓝区直连速度 | 说明 |
 |----|----------|---------------------|------|
-| 官方 quay | `quay.io/ascend/vllm-ascend` | ~0.2MB/s | 海外 CDN（us-east-1），蓝区直连基本不可用 |
+| 官方 quay | `quay.io/ascend/vllm-ascend` | ~0.2MB/s | 海外 CDN（us-east-1），基本不可用 |
 | 南大镜像 | `quay.nju.edu.cn/ascend/vllm-ascend` | ~18MB/s | 匿名可拉，与官方同 digest，**蓝区推荐** |
-| 华为内网 | `cr.rnd.huawei.com/images/vllm-ascend` | 未测通 | 同事反馈最快；需 rnd 内网 DNS/路由，蓝区当前 VPN 不可达 |
+| 华为内网 | `cr.rnd.huawei.com/images/vllm-ascend` | 未测通 | 速度最快（未验证）；需 rnd 内网 DNS/路由，蓝区当前 VPN 不可达 |
 
-> 测速为蓝区 A3 服务器直连实测；`quay.nju.edu.cn` 可通过 `tags/list` 匿名 API 确认包含 `nightly-main-a3` 等 tag。
+> 测速为蓝区 A3 服务器直连；`quay.nju.edu.cn` 可通过 `tags/list` 匿名 API 确认包含 `nightly-main-a3` 等 tag。
 
 ## 用法
 
@@ -68,7 +68,7 @@ curl -s -m 10 https://quay.nju.edu.cn/v2/ascend/vllm-ascend/tags/list | head -c 
 
 docker daemon 配了 systemd 代理、又不想重启 dockerd（共享机器上有运行容器）时，
 可用 `ctr` 直连镜像源（containerd 不走 daemon 代理），导出 tar 后 `docker load` 导入。
-ctr 1.4.9 实测：南大源直连 ~94MB/s，全程不影响运行中容器。
+ctr 直连（containerd 不走 daemon 代理）南大源 ~94MB/s，全程不影响运行中容器。
 
 ```bash
 # 1. 临时命名空间拉取（arm64 与 A3 匹配）
