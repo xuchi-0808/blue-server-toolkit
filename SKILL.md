@@ -8,7 +8,7 @@ description: >-
   debugging, HDK installation), see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 2.0.0
+  version: 2.0.1
 ---
 
 # Blue Server Toolkit
@@ -314,7 +314,9 @@ TP4 需要 4 个 chip（2 张 NPU），TP8 需要 8 个 chip（4 张 NPU）。
 vllm 代码仓内（仓目录与 pip 包重名冲突）。A3 可同时跑 4 个 TP4 服务
 （端口 8000-8003，各用独立 chip 组）。**PD 分离验证的请求必须打 load-balance
 proxy——直打 D 端口时 D 本地 prefill、P 零请求，链路失真**（vllm-ascend
-examples/disaggregated_prefill_v1 自带 proxy 脚本）。
+examples/disaggregated_prefill_v1 自带 proxy 脚本）。**P/D 两端无相互启动依赖：
+共享依赖（mooncake master 等）先起后 P/D 并行拉起，失败单侧重拉**；kv 握手端口
+撞临时端口范围的偶发 `Address already in use` 重拉即可。
 
 > 触发场景：vLLM 启动/停止/多服务并行、关键参数配置、并发验证、PD 分离链路验证
 > 详见 `~/.blue_server_toolkit/docs/vllm-service-guide.md`
