@@ -2,6 +2,18 @@
 
 遵循语义化版本。历史版本（1.x）的详细变更见 `git log`。
 
+## 2.0.2 (2026-10-10)
+
+hccs_ping 结果判读修正（A3 SuperPoD 实测）：假阳性陷阱与跨机语义。
+
+- **docs/npu-roce-connectivity.md** 三条新经验：「Cmd executed successfully!」≠ ping 通
+  （不可达目标照样打印，真实输出 0 packets transmitted + not start to send，判通以
+  recv time 非 0 且 transmitted=received>0 为准）；同芯片并发 hccn_tool 会静默丢 ping，
+  必须串行；A3 SuperPoD 每机独立 supernode 域（vnic 192.X 各机不同段，全域扫描仅本机
+  16 芯真实响应），跨机 hccs_ping 不适用，跨机 RDMA 直测 RoCE eth 面（`-ip -g`/`-ping`/
+  iperf，含芯片网关 `-gateway -g` 检查）
+- **SKILL.md**：NPU 跨机互联检查条目同步上述三坑；版本 2.0.2
+
 ## 2.0.1 (2026-10-10)
 
 vLLM 服务管理工作流：PD 分离拉起顺序（纯文档建议，无脚本/配置变更）。

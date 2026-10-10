@@ -8,7 +8,7 @@ description: >-
   debugging, HDK installation), see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 2.0.1
+  version: 2.0.2
 ---
 
 # Blue Server Toolkit
@@ -303,6 +303,7 @@ TP4 需要 4 个 chip（2 张 NPU），TP8 需要 8 个 chip（4 张 NPU）。
 多机 PD/MC2 数据面走 NPU RDMA，主机互 ping 通不算数。检查：`hccn_tool -i 0 -vnic -g`
 取 IP → `hccn_tool -i 0 -hccs_ping -g address <对端IP>` 实测（A2 用 `-ping`）；TLS 各机一致。
 **坑：`-link -g` 报 DOWN 在部分环境失真，勿据此判物理不通；hccs_ping 只覆盖 NPU 网，PD 的 dp-rpc/proxy 走主机 TCP——跨机前每台 `systemctl is-active firewalld`，active 必停（默认 INPUT 只放 22，跨机 TCP 全被 reject；firewalld 状态会漂移，他人操作/重启即可改变，每次跨机前重查，勿沿用历史结论）。**
+**坑（2026-10-10 A3 SuperPoD 实测）：判通必须看 `N packets transmitted, N received` 且 recv time 非 0——打不到的目标照样收尾打印 "Cmd executed successfully!"（真实输出 0 packets + not start to send），grep "success" 全是假阳性；同芯片并发跑 hccn_tool 会让 ping 静默不启动，探测必须串行；A3 SuperPoD 每机独立 supernode 域（vnic 192.X 各机不同段，全域扫描仅本机 16 芯真实响应），跨机 hccs_ping 本就不适用，跨机 RDMA 直测 RoCE eth 面（`-ip -g`/`-ping`/iperf，并查 `-gateway -g`）。**
 
 > 触发场景：多机 PD 分离、MC2、跨机 RDMA 连通性验证
 > 详见 `~/.blue_server_toolkit/docs/npu-roce-connectivity.md`
