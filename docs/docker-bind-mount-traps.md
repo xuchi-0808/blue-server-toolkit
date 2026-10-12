@@ -20,10 +20,11 @@ ls -ld /etc/<配置文件>                           # 宿主机源同样是 d�
 
 ## 规则二：修复要走 overlay2 手术 + 重启容器
 
-误生成的目录位于容器可写层，直接 `docker start` 无法清除（挂载点类型已定）。
-修复顺序：
+误生成的目录位于容器可写层，**容器运行中勿动**；先停容器再手术：
 
 ```bash
+# 0. 停容器
+docker stop <container>
 # 1. 找到容器可写层 UpperDir
 U=$(docker inspect --format '{{.GraphDriver.Data.UpperDir}}' <container>)
 # 2. 删除误生成的目录（只删这一项，勿动其他内容）
