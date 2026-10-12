@@ -20,7 +20,7 @@ ValueError: Free memory on device (17.87/61.27 GiB) on startup is less than desi
 |------|------|------|
 | 1 | `pkill -f "vllm serve"` | 只杀了主进程，worker 子进程还在 |
 | 2 | `pkill -9 -f python` | 暴力杀所有 python，**HBM 成为孤儿** |
-| 3 | `docker restart xc_vllm_A00280` | 容器重启但 NPU HBM 不归容器管 |
+| 3 | `docker restart <container>` | 容器重启但 NPU HBM 不归容器管 |
 
 ## 正确做法
 
@@ -50,24 +50,46 @@ kill -9 818449 2199895 818450 ...
 
 ### 方式三：等待驱动 GC
 
-如果已经强杀了，**等几分钟**。NPU 驱动有 GC 机制，会自动回收孤儿显存。约 5~10 分钟后释放。
+如果已经强杀了，**等几分钟**。NPU 驱动有 GC 机制，会自动回收孤儿显存。约 5~15 分钟
+（多卡大模型高占用场景偏长端，实测约 15 分钟）。期间 HBM 数值会持续缓慢回落，
+没回基线前拉新服务会报 `Free XX GB` 不足的假性失败。
 
-### 方式三：`docker stop` 容器（最省心）
+### 方式四：`docker stop` 容器（最省心）
 
 如果服务是跑在容器里（不是裸机），**直接 `docker stop <容器名>` 即可**——容器内所有进程被终止后，NPU 驱动会**自动回收 HBM**，无需手动 reset、无需额外等待步骤（通常几十秒内占用就回落）。这是切服务/换容器时最干净的做法：
 
 ```bash
-docker stop xc_vllm_A00280   # 停容器 = 杀掉里面全部进程 = HBM 自动释放
+docker stop <container>   # 停容器 = 杀掉里面全部进程 = HBM 自动释放
 ```
 
-> 区别于方式二的 `pkill -9`：`pkill` 是在容器**内部**强杀单个 Python 进程，进程没机会 cleanup → 孤儿显存要等驱动 GC。而 `docker stop` 是杀整个容器（含全部 worker 子进程），驱动会把这个容器占用的 NPU 资源整体回收，因此**不需要等 GC、不需要 reset**。判断标准：确认该 HBM 是不是属于"某个容器"——npu-smi 进程表里的 PID 用 `bash ~/.blue_server_toolkit/scripts/who.sh {host} {user} {pid}` 反查所属容器；是容器就 `docker stop`，是裸机进程才走方式二/三/四。
+> 区别于方式二的 `pkill -9`：`pkill` 是在容器**内部**强杀单个 Python 进程，进程没机会 cleanup → 孤儿显存要等驱动 GC。而 `docker stop` 是杀整个容器（含全部 worker 子进程），驱动会把这个容器占用的 NPU 资源整体回收，因此**不需要等 GC、不需要 reset**。判断标准：确认该 HBM 是不是属于"某个容器"——npu-smi 进程表里的 PID 用 `bash ~/.blue_server_toolkit/scripts/who.sh {host} {user} {pid}` 反查所属容器；是容器就 `docker stop`，是裸机进程才走方式二/三/五。
 
-### 方式四：芯片级重置（终极手段）
+### 方式五：芯片级重置（终极手段）
 
 ```bash
 # 重置指定 NPU 的指定 chip（危险！确认该 NPU 上无活跃进程后再用）
 npu-smi set -t reset -i <npu_id> -c <chip_id>
 ```
+
+## 清点残留进程（宿主机视角）
+
+清理前/清理后都要**在宿主机**清点一遍目标服务进程，两个规则避免假阴性：
+
+- **进程名大小写**：vLLM worker 的进程名是 `VLLM::Worker_DP0_TP0` 这类**大写
+  VLLM 前缀**，`grep "vllm"` 会全部漏掉——`REMAIN=0` 不代表干净。统一用
+  大小写不敏感的多模式匹配：
+
+  ```bash
+  ps -eo pid,args | grep -iE 'VLLM|EngineCore|launch_online_dp|run_dp' | grep -v grep
+  ```
+
+- **容器 PID ≠ 宿主 PID**：容器内 `ps` 看到的是容器命名空间的 PID，在容器里
+  kill 完，宿主机视角同名进程可能还活着（HBM 也还被占着）。容器内清理后必须
+  回宿主机 `ps` 复核；npu-smi 进程表列的是宿主机 PID，与 `who.sh` 归因配套，
+  是持卡的权威清单。
+
+批量 kill 之后做一次**误伤核对**：把杀掉的 PID 区间与各进程启动时间轴对一遍，
+确认没有落到目标服务时间窗之外（共享机上他人进程的 PID 通常在更早的区间）。
 
 ## 判机是否空闲（上机前检查）
 
@@ -84,6 +106,8 @@ ssh <user>@<host> "ss -tlnp | grep -E ':8000|:8080|:9000'"    # 常用推理服�
 ## 教训
 
 - **不要 `pkill -9 -f python`（模糊匹配），精准 `kill -9 PID` 是标准流程**
-- HBM 释放是异步的，杀完进程后等几分钟再拉新服务
+- 清点进程用大小写不敏感匹配（`VLLM::` 大写前缀会被 `grep "vllm"` 漏掉），
+  且以宿主机视角为准（容器 PID 是独立命名空间）
+- HBM 释放是异步的（实测可达约 15 分钟），杀完进程等回基线再拉新服务
 - 如果急着重置，用 `npu-smi set -t reset`，不要改服务配置来绕过显存不足
 - 判机空闲依据宿主机 HBM 数值 + 端口占用，不以进程名为依据（容器内 npu-smi 进程名列可能空白）

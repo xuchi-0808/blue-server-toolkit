@@ -4,11 +4,12 @@ description: >-
   Use when operating remote development servers (Ascend NPU blue-zone servers).
   Covers connection checks and stability (SSH multiplexing), code sync, UT execution,
   model downloads, log viewing, container management, and file sync. For advanced
-  topics (NPU process cleanup, A3 chip numbering, vLLM service management, Graph
-  debugging, HDK installation), see docs/ directory.
+  topics (NPU process cleanup, chip numbering, vLLM service management, PD
+  disaggregation bring-up, 950DT fabric identity, Graph debugging, HDK
+  installation), see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 2.0.2
+  version: 2.1.0
 ---
 
 # Blue Server Toolkit
@@ -182,6 +183,15 @@ echo "✅ scripts/ 和 docs/ 已安装到 $SKILL_DIR"
   单 die fp16 matmul 峰值：560T 机型实测 ~230-250 TFLOPS；752T 实测 ~297-322
   （阈值 280；752T 侧 2026-08-30 真机标定）。真实压测（数秒、数百瓦），
   die 被占用时勿跑。
+- **共享机占用前 wall 声明，动他人容器前逐台记录**：长时间占用 NPU 前先
+  `wall` 广播声明（任务 + 联系人）；确需停他人容器时逐台记录容器名/镜像/
+  状态留档，只 stop 不 rm，测完按记录恢复。
+- **压测类任务每轮唯一 run-id，日志 open('xb') 禁覆盖**：结果目录带唯一
+  run-id，日志文件用 `open('xb')`（exclusive create）创建，已存在即报错；
+  失败换新目录重跑，不覆盖旧证据。
+- **同日多 flavor 同名系镜像以镜像 ID 为准**：同一台机常并存多个名字相近的
+  同日构建镜像（不同 OS 底座/flavor），创建容器只认完整镜像 ID，勿按名字
+  短前缀猜。
 
 ## 命令参考
 
@@ -308,6 +318,18 @@ TP4 需要 4 个 chip（2 张 NPU），TP8 需要 8 个 chip（4 张 NPU）。
 > 触发场景：多机 PD 分离、MC2、跨机 RDMA 连通性验证
 > 详见 `~/.blue_server_toolkit/docs/npu-roce-connectivity.md`
 
+### 950DT fabric 身份与 UB 网诊断（A5）
+
+950DT 跨机通信（HCCL / mooncake ascend-direct）依赖三份 fabric 身份配置：
+`/etc/hccl_rootinfo.json`（**逐机唯一**，mindcluster-tools 生成，拷别机的必报
+EI0016）、`/etc/hixlep/ub_endpoint_npu_*.json`（经环境变量 `ASCEND_LOCAL_COMM_RES`
+交给 mooncake——.so 里搜不到文件名，别走弯路）、活网状态（`urma_admin show --brief`）。
+静态文件与活网 EID 段号漂移时，跨机传输报 `E19999: Internal error!` 而 python
+层只见 `ret=-1`；TCP 探测通 ≠ UB 面通，两个平面独立。
+
+> 触发场景：HCCL EI0004/EI0016、跨机 KV 传输失败 E19999、950DT 部署前 fabric 核验
+> 详见 `~/.blue_server_toolkit/docs/a5-950dt-fabric-config.md`
+
 ### vLLM 服务管理
 
 后台启动用 `docker exec -d`，健康检查用 `curl localhost:<port>/v1/models`，
@@ -321,6 +343,18 @@ examples/disaggregated_prefill_v1 自带 proxy 脚本）。**P/D 两端无相互
 
 > 触发场景：vLLM 启动/停止/多服务并行、关键参数配置、并发验证、PD 分离链路验证
 > 详见 `~/.blue_server_toolkit/docs/vllm-service-guide.md`
+
+### PD 分离拉起与排障
+
+失败类别清单按排查优先级组织：占卡者 → 上游代码缺口 → rootinfo/fabric →
+max-model-len 超 KV 显存 → triton 严格模式（`TRITON_ALLOW_NON_CONSTEXPR_GLOBALS=1`）
+→ 显存释放竞态（kill 后实测约 15 分钟才回基线）。mooncake P2P 日志解读
+（随机握手端口正常、`Delaying free` 含义、`ret=-1` 要下钻 C++ glog 行找真错误码）；
+冒烟先 `/v1/models` 核名（served name 从权重路径派生、大小写敏感），proxy 把请求
+同时发 P 和 D——**P 的 200 只是 prefill ack，回答来自 D**。
+
+> 触发场景：P/D 分离首次拉起、多轮失败排障、KV 传输链路验证
+> 详见 `~/.blue_server_toolkit/docs/pd-disagg-bringup.md`
 
 ### vllm-ascend 源码编译
 
@@ -365,6 +399,16 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 
 > 触发场景：docker pull 慢/失败、蓝区拉镜像、镜像源切换
 > 详见 `~/.blue_server_toolkit/docs/image-mirrors.md`
+
+### Docker bind-mount 单文件陷阱
+
+挂载**不存在的宿主机文件**时 docker 自动造出同名空目录，容器内该路径变目录、
+配置"读不出来"，症状指向应用层极具迷惑性；修复需 overlay2 UpperDir 手术。
+热更新挂载文件必须 `cat >` 原位写（保 inode，运行中容器实时可见）——`cp` 换
+inode，容器看到的仍是旧内容。
+
+> 触发场景：单文件挂载（rootinfo/hccn.conf 等）后容器内读取异常、热更新挂载文件
+> 详见 `~/.blue_server_toolkit/docs/docker-bind-mount-traps.md`
 
 ### G 区大文件下载
 
@@ -416,6 +460,7 @@ aclgraph 下打印 tensor 用 `torch_npu.print_npugraph_tensor()`。
 | Claude Code | `~/.claude/skills/blue-server-toolkit` | 软链 → 源码仓 |
 | Codex | `~/.codex/skills/blue-server-toolkit` | 软链 → 源码仓 |
 | OpenCode | `~/.config/opencode/skills/blue-server-toolkit` | 软链 → 源码仓 |
+| ZCode | `~/.zcode/skills/blue-server-toolkit` | junction → 源码仓（Windows 用 `mklink /J`，勿放实体拷贝防霰弹式修改） |
 | 运行时目录 | `~/.blue_server_toolkit/` | config.json 为实体文件（用户配置勿动）；docs/ 更新后 `cp` 同步 |
 
 回退方案：若某个工具不支持软链（现象：技能列表里 blue-server-toolkit 消失），把对应软链换回 rsync 副本即可：
