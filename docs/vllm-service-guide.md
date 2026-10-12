@@ -27,6 +27,10 @@ docker exec <container> bash -c 'tail -5 /path/to/log'
 npu-smi info  # 进程表在底部
 ```
 
+> **404 `model ... does not exist` 先核名字再查链路**：served-model-name 从权重
+> 路径派生（通常全小写），大小写敏感——`/v1/models` 返回的 `id` 是唯一权威，
+> 请求体里的 `model` 字段与它完全一致。
+
 ## 停止服务
 
 ```bash
@@ -81,6 +85,10 @@ P、D 两个引擎**没有相互启动依赖**：KV 迁移是首请求时才按�
     --port 8090 --prefill <P_IP:8080> --decode <D_IP:8210> > proxy.log 2>&1 &
   curl http://<proxy>:8090/v1/chat/completions ...
   ```
+
+> PD 拉起顺序细节、多轮失败的排查清单（占卡者/代码缺口/rootinfo/KV 显存/triton
+> 严格模式/显存释放竞态）、mooncake P2P 日志解读与冒烟方法，见
+> [pd-disagg-bringup.md](pd-disagg-bringup.md)。
 
 ## 关键参数备忘
 
