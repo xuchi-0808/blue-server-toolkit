@@ -55,3 +55,18 @@ export ASCEND_RT_VISIBLE_DEVICES=0
 ```
 
 第一列是 NPU 内的 chip 序号（0 或 1），不是全局 chip ID。全局 chip ID = NPU × 2 + NPU内chip序号。
+
+## 950DT（A5）对照：单卡单芯
+
+950DT（A5 机型）是**单卡单芯**：8 卡 = 8 chip，`/dev/davinci0-7` 与全局 chip
+ID 一一对应，**没有 ×2 换算**，`ASCEND_RT_VISIBLE_DEVICES` 直接写 0-7。
+
+| 口径 | A3（单卡双芯） | 950DT（单卡单芯） |
+|------|----------------|-------------------|
+| 全机 chip 数 | 16（8 卡 × 2） | 8（8 卡 × 1） |
+| TP4 占用 | 2 张卡 | 4 张卡 |
+| TP8 占用 | 4 张卡 | 8 张卡（全机） |
+| npu-smi Chip 列 | NPU 内序号（0/1） | 即全局 chip ID |
+
+**常见错误**：把 A3 的"TP8 = 4 NPU"经验带进 950DT 的卡数规划；或在 950DT 上
+按 `chip = NPU×2 + 序号` 换算设备号。两代机器混用时先确认机型再套换算。

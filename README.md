@@ -1,4 +1,4 @@
-# Blue Server Toolkit v2.0.0
+# Blue Server Toolkit
 
 一套通用 AI skill，用于操作远程开发服务器（蓝区服务器）。覆盖 80% 日常高频操作：连接检查与稳定性、代码同步、UT 运行、模型下载、日志查看、容器管理、文件传输。
 
@@ -104,7 +104,7 @@ AI 会在首次激活时引导你完成配置。你随时可以直接告诉 AI �
 | `scripts/start-docker-A2.sh` | A2 机型创建 Docker 容器 |
 | `scripts/start-docker-A3.sh` | A3 机型创建 Docker 容器 |
 | `scripts/start-docker-A5.sh` | A5 机型创建 Docker 容器 |
-| `docs/*.md` | 参考文档（NPU 进程清理、A3 芯片编号、Graph 调试等） |
+| `docs/*.md` | 参考文档，见下方目录结构 |
 
 ## Development
 
@@ -112,8 +112,10 @@ AI 会在首次激活时引导你完成配置。你随时可以直接告诉 AI �
 
 ```
 blue-server-toolkit/
+├── AGENTS.md             # 贡献规则（泛化经验、零历史叙事、零环境信息）
 ├── SKILL.md              # 核心 skill 文件（AI 入口）
 ├── README.md             # 本文件
+├── CHANGELOG.md
 ├── LICENSE               # MIT
 ├── config.example.json   # 配置模板（个人配置在 ~/.blue_server_toolkit/config.json）
 ├── scripts/              # 辅助脚本
@@ -125,14 +127,19 @@ blue-server-toolkit/
 │   ├── start-docker-A3.sh
 │   └── start-docker-A5.sh
 └── docs/                 # 参考文档（仅通用知识，个人机器信息不进仓）
-    ├── a3-chip-numbering.md
-    ├── graph-debugging.md
-    ├── hdk-installation.md
-    ├── image-mirrors.md
-    ├── npu-process-cleanup.md
-    ├── npu-roce-connectivity.md
-    ├── vllm-ascend-build.md
-    └── vllm-service-guide.md
+    ├── a3-chip-numbering.md          # A3 芯片编号 + 950DT 单芯对照
+    ├── a5-950dt-fabric-config.md     # 950DT fabric 身份与 UB 网诊断
+    ├── docker-bind-mount-traps.md    # bind-mount 单文件陷阱与热更新
+    ├── graph-debugging.md            # Graph 模式调试
+    ├── gzone-download.md             # G 区大文件下载
+    ├── hdk-installation.md           # 裸机驱动安装
+    ├── image-mirrors.md              # 镜像源与拉取
+    ├── npu-process-cleanup.md        # NPU 进程清理与 HBM 释放
+    ├── npu-roce-connectivity.md      # NPU 跨机互联检查
+    ├── pd-disagg-bringup.md          # PD 分离拉起与排障
+    ├── ssh-connection-stability.md   # SSH 连接稳定性
+    ├── vllm-ascend-build.md          # vllm-ascend 源码编译
+    └── vllm-service-guide.md         # vLLM 服务管理
 ```
 
 ## License
