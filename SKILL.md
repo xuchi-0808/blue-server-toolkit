@@ -293,8 +293,10 @@ docker tag quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3 quay.io/ascend/vll
 
 标准流程：`npu-smi info` 查 PID → `kill -9 <pid>`（精准 PID，执行前需提醒用户）。
 禁止 `pkill -9 -f python`（模糊匹配误杀共享服务器上其他用户进程）。
-孤儿 HBM（npu-smi 无进程但显存仍占满）→ `docker restart` 容器。
+孤儿 HBM（npu-smi 无进程但显存仍占满）→ `docker stop` 容器（stop 后驱动整体回收；
+`restart` 立即拉起不给回收窗口，勿用）。
 判机空闲须在**宿主机**跑 npu-smi 看 HBM 数值（容器内他人进程名列可能空白，"无进程名"≠空闲），辅以 `ss -tlnp` 查端口；`docker ps` 只用于占用归因和接管清点，不作空闲判据。
+清点残留进程用大小写不敏感 grep（`VLLM::` 大写前缀会被 `grep "vllm"` 漏掉），以宿主机 PID 为准。
 
 > 触发场景：HBM 占用异常、服务重启报 Free memory 不足、进程残留、上机前判断机器是否空闲
 > 详见 `~/.blue_server_toolkit/docs/npu-process-cleanup.md`
@@ -304,6 +306,8 @@ docker tag quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3 quay.io/ascend/vll
 A3 单卡双芯：8 卡 = 16 chip。`ASCEND_RT_VISIBLE_DEVICES` 用全局 chip ID（0-15），
 不是 NPU 卡号（0-7）。换算：chip ID = NPU号 × 2 + 芯片序号。
 TP4 需要 4 个 chip（2 张 NPU），TP8 需要 8 个 chip（4 张 NPU）。
+950DT（A5）单卡单芯：8 卡 = 8 chip，无 ×2 换算——两代机型的对照表见同文档末节，
+混用时先确认机型再套换算。
 
 > 触发场景：配置 ASCEND_RT_VISIBLE_DEVICES、TP 并行度设置、npu-smi 输出解读
 > 详见 `~/.blue_server_toolkit/docs/a3-chip-numbering.md`
