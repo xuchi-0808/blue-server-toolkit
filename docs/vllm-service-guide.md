@@ -31,6 +31,11 @@ npu-smi info  # 进程表在底部
 > 路径派生（通常全小写），大小写敏感——`/v1/models` 返回的 `id` 是唯一权威，
 > 请求体里的 `model` 字段与它完全一致。
 
+> **容器包装模式下 curl 的 JSON 引号极易转义错**：
+> `ssh "docker exec <c> bash -c 'curl -d \"...\"'"` 三层引号嵌套，漏一处转义就
+> 发出畸形体。稳妥做法：先把 JSON heredoc 写到远端文件，再 `curl -d @<file>`；
+> 或把整条 curl 落成脚本文件传上去执行。
+
 ## 停止服务
 
 ```bash

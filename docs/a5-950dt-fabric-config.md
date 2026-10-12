@@ -44,11 +44,14 @@ fabric 重新编号后，`rootinfo`/`ub_endpoint` 里的 EID 段号**不会自�
 ```bash
 # 1. 看两台机活网 EID：同 slice（EID 中段相同）、不同节点偏移 → 链路本身通
 urma_admin show --brief
-#    输出形如：eid0 0000:...:0010:0000:dfd8:XXXX，link 列应全 ACTIVE
+#    输出形如：eid0 0000:...:0010:0000:XXXX:YYYY，link 列应全 ACTIVE
 
-# 2. 比对静态文件里的 EID 段号与活网是否一致（不一致 = 漂移，需重新生成/修复）
-grep -o 'dfd[0-9a-f]' /etc/hixlep/ub_endpoint_npu_0.json   # 静态侧抽样
+# 2. 抽样比对静态文件与活网的 EID 中段是否一致（不一致 = 漂移，需重新生成/修复）
+grep -oE 'comm_id[^,]*' /etc/hixlep/ub_endpoint_npu_0.json | head -3
 ```
+
+注意两边格式不同：`urma_admin` 输出是冒号分组，hixlep/rootinfo 里是连续 hex——
+取各自 EID 的同位段（如中段节点/切片编号）对齐比较，不要整串硬比。
 
 对照实验：`export ASCEND_LOCAL_COMM_RES='{"version":"1.2"}'` 可以让
 vllm-ascend 跳过 hixlep 文件内容，用于区分"文件过期"还是"其他层故障"。
