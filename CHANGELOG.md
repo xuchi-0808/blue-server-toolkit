@@ -2,6 +2,17 @@
 
 遵循语义化版本。历史版本（1.x）的详细变更见 `git log`。
 
+## 2.2.0 (2026-10-14)
+
+服务级性能 profiling 专题沉淀：torch profiler 官方路线全流程与踩坑速查。
+
+- **新增 `docs/vllm-service-profiling.md`**：拉起烘焙 `--profiler-config`（每引擎端口
+  独立子目录防 rank 同名互踩）/ 直连端口 curl 启停（proxy 不转发采集端点、
+  `/start_profile` 发出即采集禁当健康探测）/ generation_tokens_total 连续 4 次大增量
+  判稳态段只采 ~3s / 停服核验三件事 / 离线 `torch_npu analyse()` 逐 rank 解析（msprof
+  CLI 不可用；共享盘多机并发须按机器+端口分片）/ 分析七维度口诀；11 条踩坑速查表
+- **SKILL.md**：新增"服务级性能 profiling"条目（触发场景 + 详见指针）
+
 ## 2.1.0 (2026-10-12)
 
 950DT 双机 PD 分离专题沉淀：fabric 身份配置、PD 拉起排障、docker bind-mount 陷阱。

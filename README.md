@@ -139,7 +139,8 @@ blue-server-toolkit/
     ├── pd-disagg-bringup.md          # PD 分离拉起与排障
     ├── ssh-connection-stability.md   # SSH 连接稳定性
     ├── vllm-ascend-build.md          # vllm-ascend 源码编译
-    └── vllm-service-guide.md         # vLLM 服务管理
+    ├── vllm-service-guide.md         # vLLM 服务管理
+    └── vllm-service-profiling.md     # 服务级性能 profiling（torch profiler 官方路线）
 ```
 
 ## License
