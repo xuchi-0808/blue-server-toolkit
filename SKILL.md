@@ -372,6 +372,19 @@ vllm-ascend/ 仓根同法装；蓝区先配全局 pip 国内源（见经验备�
 > 触发场景：源码安装/升级 vllm-ascend、bisect 切版本、镜像内版本不满足需求
 > 详见 `~/.blue_server_toolkit/docs/vllm-ascend-build.md`（命令速查 + 按报错关键字 FAQ）
 
+### 服务级性能 profiling（torch profiler 官方路线）
+
+唯一正路 = vllm-ascend service_profiling_guide：**拉起时 `--profiler-config.profiler torch
+--profiler-config.torch_profiler_dir`（每引擎端口独立子目录，防 rank 同名互踩）→ 压到稳态后
+直连各引擎端口 curl `/start_profile` → ~3s → `/stop_profile`（proxy 不转发采集端点；
+`/start_profile` 发出即采集，禁当健康探测）→ 停服核验（进程/端口/HBM）→ 离线
+`torch_npu.profiler.profiler.analyse(<ascend_pt 目录>)` 逐 rank 解析（msprof CLI 不可用；
+共享盘多机解析须按机器+端口分片）**。窗口对准用 `/metrics` generation_tokens_total
+连续 4 次大增量判进正式稳态段，只采 ~3s 稳态 decode。服务运行期只采原始不解析。
+
+> 触发场景：性能未达标归因、算子/通信/负载分析、PD 分离性能对比
+> 详见 `~/.blue_server_toolkit/docs/vllm-service-profiling.md`
+
 ### Graph 模式调试
 
 精度/行为异常时，先加 `--enforce-eager` 排除 graph capture 影响：
