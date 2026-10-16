@@ -2,6 +2,26 @@
 
 遵循语义化版本。历史版本（1.x）的详细变更见 `git log`。
 
+## 2.3.0 (2026-10-16)
+
+profiling 判读与工程化增量：聚合口径、provenance 纪律、成本预估。
+
+- **docs/vllm-service-profiling.md**：step_trace_time 修正为真实分桶字段
+  （Computing / Communication / Communication(Not Overlapped) / Overlapped / Free，
+  Stage 为行总计；恒等式 Stage ≈ Computing + Not Overlapped + Free，通信占比口径
+  用 Not Overlapped）；注意力占比公式（FusedInferAttentionScore +
+  _decode_qk_score_kernel / 单 rank 全算子时间）；rank 计算失衡口径与窗口代表性
+  校验（TPOT/TPS 对独立专测）；机间步数差 ~3% 系统性偏移的声明要求；批量解析
+  编排（RAW_BASE+argv 参数化禁硬编码、docker exec -d + 日志关键字判进度、
+  单 rank 成功判据 op_statistic.csv、每 rank 实测约 40s）；产物目录
+  profiling/{raw,parsed} 约定与 README-provenance（镜像补丁清单必记，解读前先读）；
+  成本预估（单份闭环实测 60-90min）；多机同窗编排；踩坑表 11→14 条
+- **docs/npu-process-cleanup.md**：新增宿主机管道 kill 容器内 PID 静默失败
+  （须 `docker exec -i bash -s` 整段进容器）；npu-smi HBM 列双空格对齐的
+  grep 抓法（`grep -oE "[0-9]+ */ *98304"`，分母按机型替换）
+- **SKILL.md**：进阶指南 profiling 与 NPU 进程清理条目同步增补；修复 2.2.0
+  漏 bump 的 frontmatter version（本次直接升至 2.3.0）
+
 ## 2.2.0 (2026-10-14)
 
 服务级性能 profiling 专题沉淀：torch profiler 官方路线全流程与踩坑速查。
