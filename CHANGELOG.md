@@ -2,6 +2,23 @@
 
 遵循语义化版本。历史版本（1.x）的详细变更见 `git log`。
 
+## 2.4.0 (2026-10-16)
+
+profiling 分析判读专项：从聚合数据到瓶颈结论的方法与误区，持续迭代型文档。
+
+- **新增 `docs/vllm-profiling-analysis.md`**：判读总纲（forward 结构锚点 → per-forward
+  分解 p50 逐项对比 → 归因到单算子）；step_trace_time Free 桶陷阱（聚合口径 + 偶发
+  停等假象，判「算 vs 等」用 kernel_details 自算多流 union busy / 静默 idle）；
+  kernel_details 逐算子判读（Duration 含调度等待、aiv_vec_ratio/aiv_mte2_ratio 三分
+  算力/访存延迟/访存带宽、Input Shapes 核验维度）；通信归因（reduceScatter 先查接线
+  再归属、MoE a2a 多引擎争跨机链路反更贵、巨型 allGather AICPU kernel 是失步症状、
+  per-call 连 payload 看、跨分支谱系横比无效）；机制性归因条目（qk 打分核线性计费
+  TP 切头零收益）；7 条误区清单
+- **docs/vllm-service-profiling.md**：文首互补链接与「聚合与判读口径」末尾加
+  分析判读文档指针
+- **SKILL.md**：进阶指南新增「vLLM profiling 分析判读」条目（采集条目补互见）；
+  description 补 profiling & analysis（2.2.0 漏加）
+
 ## 2.3.0 (2026-10-16)
 
 profiling 判读与工程化增量：聚合口径、provenance 纪律、成本预估。

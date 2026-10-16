@@ -3,7 +3,8 @@
 > 场景：对运行中的 vllm-ascend 服务（单机或多机 PD 分离）采集稳态性能数据并产出分析报告。
 > 唯一正路 = vllm-ascend 仓 `docs/source/developer_guide/performance_and_debug/service_profiling_guide.md`
 > 的 torch profiler 流程：**拉起服务时配置参数 → curl 启停采集 → 停服核验 → 离线一行命令解析**。
-> 与 [pd-disagg-bringup.md](pd-disagg-bringup.md)（拉起排障）、[vllm-service-guide.md](vllm-service-guide.md)（服务生命周期）互补。
+> 与 [pd-disagg-bringup.md](pd-disagg-bringup.md)（拉起排障）、[vllm-service-guide.md](vllm-service-guide.md)（服务生命周期）互补；
+> 数据拿到后的**分析判读方法**（逐算子归因、拓扑对比、误区）见 [vllm-profiling-analysis.md](vllm-profiling-analysis.md)。
 
 ## 顺序铁律（违反必返工）
 
@@ -91,6 +92,9 @@ rank 计算失衡、api_statistic top N、communication 汇总。
   个位数百分比内才可信），且采集时间戳落在正式段稳态 decode 时间轴内。
 - **跨机对比须知**：两机引擎步数差是系统性偏移（实测可 ~3%），跨机/跨拓扑对比结论必须
   声明该偏移，3% 以内的差不作数。
+
+占比数字的解读陷阱（Free 桶不能直接当空闲）与逐算子归因、拓扑对比方法见
+[vllm-profiling-analysis.md](vllm-profiling-analysis.md)。
 
 ## 分析报告必含维度
 

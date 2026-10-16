@@ -6,10 +6,10 @@ description: >-
   model downloads, log viewing, container management, and file sync. For advanced
   topics (NPU process cleanup, chip numbering, vLLM service management, PD
   disaggregation bring-up, 950DT fabric identity, Graph debugging, HDK
-  installation), see docs/ directory.
+  installation, vLLM service profiling & analysis), see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 2.3.0
+  version: 2.4.0
 ---
 
 # Blue Server Toolkit
@@ -391,6 +391,20 @@ Overlapped) + Free，**通信占比口径用 Not Overlapped**；注意力占比 
 
 > 触发场景：性能未达标归因、算子/通信/负载分析、PD 分离性能对比
 > 详见 `~/.blue_server_toolkit/docs/vllm-service-profiling.md`
+> 数据到手后的分析判读方法另见「vLLM profiling 分析判读」条目
+
+### vLLM profiling 分析判读
+
+「数据 → 结论」的判读方法，与 vllm-service-profiling.md（采集解析管线）配对：
+先建 forward 结构锚点（层数/稀疏与全注意力配比/draft 步数/投机 token 数）→
+per-forward 分解 p50 中位数逐项对比 → 归因到单算子（`aiv_vec_ratio`/`aiv_mte2_ratio`
+三分算力/访存延迟/访存带宽瓶颈）。核心陷阱：**step_trace_time 的 Free 桶是聚合口径，
+不能直接当空闲证据**（偶发停等假象），判「算 vs 等」用 kernel_details 自算多流 union
+busy 率；reduceScatter 先查实现接线再归属（可能是序列并行而非 MoE）；巨型 allGather
+类 AICPU kernel 是失步症状非差异来源；跨分支谱系横比通信无效。
+
+> 触发场景：profiling 数据解读、瓶颈归因、dp/tp 拓扑对比、通信耗时归因、占比结论复核
+> 详见 `~/.blue_server_toolkit/docs/vllm-profiling-analysis.md`
 
 ### Graph 模式调试
 
