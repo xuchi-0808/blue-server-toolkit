@@ -87,6 +87,16 @@ npu-smi set -t reset -i <npu_id> -c <chip_id>
   kill 完，宿主机视角同名进程可能还活着（HBM 也还被占着）。容器内清理后必须
   回宿主机 `ps` 复核；npu-smi 进程表列的是宿主机 PID，与 `who.sh` 归因配套，
   是持卡的权威清单。
+- **宿主机管道里 kill 容器内 PID = 静默失败**：`docker exec <container> ps ... |
+  while read pid; do kill $pid; done` 这类管道写法里 ps 在容器内跑、kill 却在
+  **宿主机**执行，PID 属容器命名空间 → 零效果且不报错。批量清理容器内进程必须
+  整段放进容器执行：
+
+  ```bash
+  ssh <user>@<host> 'docker exec -i <container> bash -s' <<'EOF'
+  ps -eo pid,args | grep -iE 'vllm|EngineCore' | grep -v grep | awk '{print $1}' | xargs -r kill -9
+  EOF
+  ```
 
 批量 kill 之后做一次**误伤核对**：把杀掉的 PID 区间与各进程启动时间轴对一遍，
 确认没有落到目标服务时间窗之外（共享机上他人进程的 PID 通常在更早的区间）。
@@ -102,6 +112,9 @@ ssh <user>@<host> "ss -tlnp | grep -E ':8000|:8080|:9000'"    # 常用推理服�
 
 - 判占用看 **HBM 数值**，不以进程名为依据：容器内执行 npu-smi 时，其他容器/宿主机进程的进程名列可能空白（容器 PID namespace 解析不到这些 PID）
 - `docker ps` 不作空闲判据（他人容器 Up 但不占 NPU/端口时无冲突），仅用于：占用归因（谁在用）、接管清点（要停的容器名单）
+- 脚本化抓取 HBM 数值注意**表格双空格对齐**：`grep "[0-9]+ / 98304"` 抓不到，须
+  `npu-smi info | grep -oE "[0-9]+ */ *98304"`。分母随机型：950DT/B100 单卡
+  98304MB（空闲基线实测约 4.8GB），A3 单芯 65536MB——grep 模式里的分母按目标机型替换。
 
 ## 教训
 
@@ -111,3 +124,7 @@ ssh <user>@<host> "ss -tlnp | grep -E ':8000|:8080|:9000'"    # 常用推理服�
 - HBM 释放是异步的（实测可达约 15 分钟），杀完进程等回基线再拉新服务
 - 如果急着重置，用 `npu-smi set -t reset`，不要改服务配置来绕过显存不足
 - 判机空闲依据宿主机 HBM 数值 + 端口占用，不以进程名为依据（容器内 npu-smi 进程名列可能空白）
+- 宿主机管道里 kill 容器内 PID 是静默失败（kill 在宿主机执行），批量清理用
+  `docker exec -i <container> bash -s` 整段放进容器
+- 脚本抓 HBM 数值用 `grep -oE "[0-9]+ */ *<总容量MB>"`（npu-smi 表格双空格对齐，
+  普通按空格split的 grep 抓不到）

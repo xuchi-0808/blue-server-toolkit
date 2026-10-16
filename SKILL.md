@@ -9,7 +9,7 @@ description: >-
   installation), see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 2.1.0
+  version: 2.3.0
 ---
 
 # Blue Server Toolkit
@@ -297,6 +297,9 @@ docker tag quay.nju.edu.cn/ascend/vllm-ascend:nightly-main-a3 quay.io/ascend/vll
 `restart` 立即拉起不给回收窗口，勿用）。
 判机空闲须在**宿主机**跑 npu-smi 看 HBM 数值（容器内他人进程名列可能空白，"无进程名"≠空闲），辅以 `ss -tlnp` 查端口；`docker ps` 只用于占用归因和接管清点，不作空闲判据。
 清点残留进程用大小写不敏感 grep（`VLLM::` 大写前缀会被 `grep "vllm"` 漏掉），以宿主机 PID 为准。
+宿主机管道里 kill 容器内 PID 是**静默失败**（ps 在容器跑、kill 在宿主机跑）——批量清理用
+`docker exec -i <container> bash -s <<'EOF'` 整段放进容器；脚本抓 HBM 数值注意表格双空格
+对齐（`grep -oE "[0-9]+ */ *98304"`，分母按机型替换）。
 
 > 触发场景：HBM 占用异常、服务重启报 Free memory 不足、进程残留、上机前判断机器是否空闲
 > 详见 `~/.blue_server_toolkit/docs/npu-process-cleanup.md`
@@ -381,6 +384,10 @@ vllm-ascend/ 仓根同法装；蓝区先配全局 pip 国内源（见经验备�
 `torch_npu.profiler.profiler.analyse(<ascend_pt 目录>)` 逐 rank 解析（msprof CLI 不可用；
 共享盘多机解析须按机器+端口分片）**。窗口对准用 `/metrics` generation_tokens_total
 连续 4 次大增量判进正式稳态段，只采 ~3s 稳态 decode。服务运行期只采原始不解析。
+解析后先聚合再判读：step_trace_time 分桶恒等式 Stage ≈ Computing + Communication(Not
+Overlapped) + Free，**通信占比口径用 Not Overlapped**；注意力占比 = `FusedInferAttentionScore
++ _decode_qk_score_kernel` / 单 rank 全算子时间；解读前必读 run 根 README-provenance
+（镜像补丁清单）。单份闭环实测 60-90 分钟（采集仅 3s，大头是拉起/稳态/停服/解析）。
 
 > 触发场景：性能未达标归因、算子/通信/负载分析、PD 分离性能对比
 > 详见 `~/.blue_server_toolkit/docs/vllm-service-profiling.md`
