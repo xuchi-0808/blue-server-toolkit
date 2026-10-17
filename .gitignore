@@ -18,5 +18,8 @@ config.local.json
 # Mimosa plugin workspace
 .mimosa/
 
+# ZCode session workspace (local tooling artifacts)
+.zcode/
+
 # Local agent instructions (not synced to GitHub)
 AGENTS.md

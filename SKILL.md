@@ -9,7 +9,7 @@ description: >-
   installation, vLLM service profiling & analysis), see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 2.4.0
+  version: 2.4.1
 ---
 
 # Blue Server Toolkit
@@ -389,7 +389,7 @@ Overlapped) + Free，**通信占比口径用 Not Overlapped**；注意力占比 
 + _decode_qk_score_kernel` / 单 rank 全算子时间；解读前必读 run 根 README-provenance
 （镜像补丁清单）。单份闭环实测 60-90 分钟（采集仅 3s，大头是拉起/稳态/停服/解析）。
 
-> 触发场景：性能未达标归因、算子/通信/负载分析、PD 分离性能对比
+> 触发场景：采集服务级 profiling、/start_profile 404、稳态采集窗口对准、profiling 解析与聚合报错、PD 分离性能数据采集
 > 详见 `~/.blue_server_toolkit/docs/vllm-service-profiling.md`
 > 数据到手后的分析判读方法另见「vLLM profiling 分析判读」条目
 
@@ -403,7 +403,7 @@ per-forward 分解 p50 中位数逐项对比 → 归因到单算子（`aiv_vec_r
 busy 率；reduceScatter 先查实现接线再归属（可能是序列并行而非 MoE）；巨型 allGather
 类 AICPU kernel 是失步症状非差异来源；跨分支谱系横比通信无效。
 
-> 触发场景：profiling 数据解读、瓶颈归因、dp/tp 拓扑对比、通信耗时归因、占比结论复核
+> 触发场景：性能未达标归因、算子/通信/负载分析、profiling 数据解读、dp/tp 拓扑对比、占比结论复核
 > 详见 `~/.blue_server_toolkit/docs/vllm-profiling-analysis.md`
 
 ### Graph 模式调试
@@ -513,4 +513,5 @@ rsync -a --exclude '.git' --exclude '.DS_Store' "$HOME/Documents/Code/AgentSkill
 ## 扩展
 
 要新增文档：加到 `docs/` 目录，在"进阶指南"章节添加索引条目，
-然后更新 frontmatter 的 version。
+然后更新 frontmatter 的 version。版本号约定：新专题/新文档/新功能 =
+第二位 +1（minor）；修正补坑类增量 = 第三位 +1（patch）。
