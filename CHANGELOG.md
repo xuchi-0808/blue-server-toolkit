@@ -2,6 +2,17 @@
 
 遵循语义化版本。历史版本（1.x）的详细变更见 `git log`。
 
+## 2.4.2 (2026-10-18)
+
+仓库卫生修正：历史环境信息清理与注释订正。
+
+- **历史重写**：移除早期已废弃的 `docs/server-configs.md` 与 `docs/site-notes/`
+  （全历史），环境专属信息统一占位化；README 示例路径中的任务号改为
+  `<task-id>`；删除废弃的 `release/v0.9`、`release/v1.0` 分支与 `v0.9`、`v1.0` tag
+- **.gitignore**：订正 config.json 注释（仓内已无该文件，本地配置在
+  `~/.blue_server_toolkit/`）
+- **SKILL.md**：version 2.4.2
+
 ## 2.4.1 (2026-10-17)
 
 仓库体检修正：卫生项与索引触发词；确立版本号约定。

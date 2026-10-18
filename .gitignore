@@ -8,8 +8,8 @@ Thumbs.db
 *.swp
 *.swo
 
-# User config (real server info, NOT the template)
-# The repo's config.json is a template with placeholder values
+# User config (real server info, never committed)
+# The repo ships no config.json; local config lives at ~/.blue_server_toolkit/config.json
 config.local.json
 
 # Logs

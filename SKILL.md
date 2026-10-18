@@ -9,7 +9,7 @@ description: >-
   installation, vLLM service profiling & analysis), see docs/ directory.
   触发方式：提到"服务器""蓝区""SSH""容器""NPU"等远程开发操作场景时。
 metadata:
-  version: 2.4.1
+  version: 2.4.2
 ---
 
 # Blue Server Toolkit
