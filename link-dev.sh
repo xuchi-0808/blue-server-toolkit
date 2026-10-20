@@ -54,7 +54,16 @@ done
 fail=0
 declare -a summary=()
 
-for base in "${TARGETS[@]}"; do
+# unlink 模式按逆序处理工具目录：先拆外层（如 ~/.zcode 指向 ~/.claude 的
+# 二级链），再拆内层，避免先删内层导致外层变断链而无法解析
+if [[ "$MODE" == "unlink" ]]; then
+  ORDER_TARGETS=()
+  for ((i=${#TARGETS[@]}-1; i>=0; i--)); do ORDER_TARGETS+=("${TARGETS[i]}"); done
+else
+  ORDER_TARGETS=("${TARGETS[@]}")
+fi
+
+for base in "${ORDER_TARGETS[@]}"; do
   tool="$(basename "$(dirname "$base")")/$(basename "$base")"
   for name in "${SKILLS[@]}"; do
     link="$base/$name"
@@ -65,14 +74,11 @@ for base in "${TARGETS[@]}"; do
 
     if [[ "$MODE" == "unlink" ]]; then
       if [[ -L "$link" ]]; then
-        direct="$(readlink "$link")"
         resolved="$(rp "$link")" || resolved=""
-        # 链条中间环节已被删除时 readlink -f 会失败：对直连目标再解析一层
-        if [[ -z "$resolved" && -e "$direct" ]]; then
-          resolved="$(rp "$direct")" || resolved=""
-        fi
         # 只按"最终解析是否落在本仓库内"判定，不做文件名子串匹配，
-        # 避免误删路径里恰好含插件名的其他仓库链接（如插件缓存目录）
+        # 避免误删路径里恰好含插件名的其他仓库链接（如插件缓存目录）。
+        # 断链（中间环节已被手动删除）无法证实指向本仓库，保守保留；
+        # 正常流程配合上方逆序处理不会产生断链
         if [[ "$resolved" == "$REPO_ROOT"* ]]; then
           rm "$link" && summary+=("unlinked  $tool/$name")
         fi
