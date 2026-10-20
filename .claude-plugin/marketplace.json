@@ -1,0 +1,16 @@
+{
+  "name": "blue-server-toolkit",
+  "owner": { "name": "xuchi" },
+  "plugins": [
+    {
+      "name": "blue-server-toolkit",
+      "source": "./",
+      "version": "3.0.0",
+      "description": "Ascend NPU blue-zone remote server operations: daily-ops hub plus specialized skills.",
+      "displayName": "Blue Server Toolkit",
+      "displayName_i18n": { "zh-CN": "蓝区服务器工具箱" },
+      "description_i18n": { "zh-CN": "蓝区 Ascend NPU 远程开发服务器操作：日常操作中枢，外加 NPU 进程/互联、vLLM 服务/编译/性能、裸机供给等专项 skill。" },
+      "category": "developer-tools"
+    }
+  ]
+}
