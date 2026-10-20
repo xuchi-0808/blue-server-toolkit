@@ -1,11 +1,11 @@
-# Skill 契约单源（templates/skill-contract.md）
+# 运行时契约与安全红线（单一来源）
 
 > 本文件是全部 `skills/*/SKILL.md` 顶部「运行时契约 + 安全红线」块的**唯一编辑点**。
-> 修改锚点之间的内容后，把该块原样同步到每个 skill（check-repo.sh 会逐字节比对），
-> 再按 AGENTS.md 规则 bump 版本。
+> 修改锚点之间的内容后，把该块原样复制到每个 skill（check-repo.sh 会逐字节比对），
+> 再按 AGENTS.md 的规则递增版本号。
 
 <!-- BEGIN blue-skill-contract -->
-> **运行时契约**（全部 blue-* skill 共享；单点定义于 templates/skill-contract.md）
+> **运行时契约**（全部 blue-* skill 共享；唯一定义处 templates/skill-contract.md）
 >
 > 1. 机器信息只读 `~/.blue_server_toolkit/config.json`（host/user/container）与
 >    `notes/`；个人环境信息（IP、机器清单、任务状态）禁止写回本仓。
@@ -13,8 +13,8 @@
 >    蓝区装任何包之前先配全局源
 >    `pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/`。
 > 3. 长命令输出重定向日志再分段看：`cmd > <日志路径> 2>&1; echo EXIT=$?` 后
->    `tail`/`grep`；禁止 `| tail` 截断 stdout（管道使 `$?` 失真）。日志放用户
->    指定的工作目录，未指定时放 `/tmp/<任务名>/`。
+>    `tail`/`grep`；禁止 `| tail` 截断 stdout（管道后 `$?` 反映的是 tail 的
+>    退出码）。日志放用户指定的工作目录，未指定时放 `/tmp/<任务名>/`。
 > 4. 共享机礼仪：长时间占用 NPU 先 `wall` 广播声明；确需动他人容器，逐台记录
 >    （容器名/镜像/状态），只 stop 不 rm，测完按记录恢复。
 

@@ -1,24 +1,25 @@
 # Blue Server Toolkit v3.0.0
 
-蓝区（Ascend NPU）远程开发服务器操作插件：**一仓一插件，7 个按任务域拆分的 skill**。
-日常操作走 hub，专项问题（NPU 进程/跨机互联、vLLM 服务/编译/性能、裸机装机）
-各自触发对应 skill，按需加载。
+蓝区（Ascend NPU）远程开发服务器操作插件：**一个仓库一个插件，内含 7 个按任务
+领域拆分的 skill**。日常操作由 hub（总入口 skill）处理；专项问题（NPU 进程/
+跨机互联、vLLM 服务/编译/性能、裸机装机）各自触发对应 skill，按需加载。
 
 ## Skills
 
 | skill | 覆盖 |
 |-------|------|
-| `blue-server-toolkit`（hub） | 日常操作（连接/代码/UT/下载/日志/容器/传文件）+ 镜像源 + SSH 稳定性 + bind-mount 陷阱 + G 区下载 + 路由表 + 安全红线 |
-| `blue-npu-ops` | 单机 NPU：进程清理、HBM 释放、判机空闲、A3 chip 编号、算力实测 |
+| `blue-server-toolkit`（hub，总入口） | 日常操作（连接/代码/UT/下载/日志/容器/传文件）+ 镜像源 + SSH 稳定性 + bind-mount 陷阱 + G 区下载 + 路由表 + 安全红线 |
+| `blue-npu-ops` | 单机 NPU：进程清理、HBM 释放、判断机器空闲、A3 chip 编号、算力实测 |
 | `blue-npu-fabric` | 跨机互联：RoCE/hccs_ping、firewalld、950DT fabric 身份（EI0004/EI0016/E19999） |
 | `blue-vllm-service` | vLLM 服务生命周期：起停、多实例、PD 分离、TP/并行度、graph 调试 |
-| `blue-vllm-ascend-build` | vllm-ascend 源码编译/升级、版本配套、报错 FAQ、rsync-chown |
-| `blue-vllm-profiling` | torch profiler 采集管线 + trace 分析判读 |
-| `blue-server-provisioning` | 裸机 HDK 驱动/固件安装、start-docker 建容器、镜像 ID 纪律 |
+| `blue-vllm-ascend-build` | vllm-ascend 源码编译/升级、版本配套、报错 FAQ、rsync 后 chown |
+| `blue-vllm-profiling` | torch profiler 采集流程 + trace 分析判读 |
+| `blue-server-provisioning` | 裸机 HDK 驱动/固件安装、start-docker 建容器、按镜像 ID 识别镜像 |
 
-设计要点：docs 永不内联进 skill，统一安装到 `~/.blue_server_toolkit/` 懒加载；
-安全红线与运行时契约单源于 `templates/skill-contract.md`、全文复制进每个 skill
-（`./check-repo.sh` 逐字节校验）；版本单源于 `.claude-plugin/plugin.json`。
+设计要点：docs 不内联进 skill，统一安装到 `~/.blue_server_toolkit/` 按需读取；
+安全红线与运行时契约（指 docs/scripts 的安装位置、路径引用与同步规则）以
+`templates/skill-contract.md` 为单一来源，全文复制进每个 skill
+（`./check-repo.sh` 逐字节校验）；版本号只写在 `.claude-plugin/plugin.json`。
 
 ## 安装
 
@@ -27,27 +28,28 @@
 1. **VPN 已连通**（公司指定客户端）
 2. **SSH 公钥已配置**（手动登录一次确保免密）
 
-### 方式一：开发态（软链，改仓即生效）
+### 方式一：开发模式（软链安装，改仓库立即生效）
 
 ```bash
-git clone <本仓> && cd blue-server-toolkit
-./link-dev.sh        # 为 Claude Code / Codex / OpenCode / ZCode 建逐 skill 软链
-./link-dev.sh --check # 验证；--unlink 拆链；--prune-old 清旧形态链接
+git clone <本仓库> && cd blue-server-toolkit
+./link-dev.sh         # 为 Claude Code / Codex / OpenCode / ZCode 的每个 skill 建软链
+./link-dev.sh --check # 验证；--unlink 删除链接；--prune-old 清理旧布局遗留链接
 ```
 
 首次在会话中触发任一 blue-* skill 时，hub 会引导完成
 `~/.blue_server_toolkit/config.json` 配置与 docs/scripts 安装。
 
-### 方式二：插件市场（版本化快照，不热更）
+### 方式二：插件市场（安装版本化快照，不随仓库更新）
 
-- **ZCode**：Plugin Marketplace → `+` → Add Plugin Marketplace → 粘贴本仓根路径 →
-  Discover → 安装 Blue Server Toolkit。安装态 skill 以
-  `blue-server-toolkit:<skill>` 限定名出现。
-- **Claude Code**：`claude plugin marketplace add <本仓路径>` →
+- **ZCode**：Plugin Marketplace → `+` → Add Plugin Marketplace → 粘贴本仓库
+  根目录路径 → Discover → 安装 Blue Server Toolkit。插件安装的 skill 以带
+  插件前缀的名称 `blue-server-toolkit:<skill>` 出现。
+- **Claude Code**：`claude plugin marketplace add <本仓库路径>` →
   `/plugin install blue-server-toolkit`。
 
-> **开发链与插件安装互斥**：裸名 skill 与插件限定名是不同加载键，同机会双载。
-> 装插件前先 `./link-dev.sh --unlink`；保持开发态则不装插件。
+> **开发软链与插件安装互斥**：软链注册的是不带前缀的 skill 名，插件注册的是
+> 带前缀的 `blue-server-toolkit:<skill>` 名，两者同时存在会加载两份。装插件前
+> 先 `./link-dev.sh --unlink`；保持开发模式则不装插件。
 
 ## 配置
 
@@ -91,42 +93,45 @@ docs/
 
 ```
 blue-server-toolkit/
-├── .claude-plugin/{plugin.json,marketplace.json}  # 唯一插件清单（ZCode 兼容识别）
-├── skills/<name>/SKILL.md × 7                     # hub + 6 专项
-├── docs/ · scripts/ · config.example.json         # 共享资产（安装到 ~/.blue_server_toolkit/）
-├── templates/skill-contract.md                    # 契约+红线单源（复制进每个 skill）
-├── link-dev.sh · check-repo.sh                    # 开发态安装器 / 合入门禁
+├── .claude-plugin/{plugin.json,marketplace.json}  # 唯一插件清单（ZCode 也能识别）
+├── skills/<name>/SKILL.md × 7                     # hub + 6 个专项 skill
+├── docs/ · scripts/ · config.example.json         # docs 与 scripts（安装到 ~/.blue_server_toolkit/）
+├── templates/skill-contract.md                    # 契约与红线单一来源（复制进每个 skill）
+├── link-dev.sh · check-repo.sh                    # 开发模式安装脚本 / 合并前检查
 └── README.md · CHANGELOG.md · LICENSE
 ```
 
-### 提交门禁与版本
+### 提交前检查与版本
 
-- 提交前必跑 `./check-repo.sh --strict`：仓形、单一清单、frontmatter、description
-  预算（合计 ≤50 行、触发词前 250 字符）、`../` 零容忍、契约块与单源逐字节一致、
-  版本三镜像、行数预算（hub ≤400 / spoke ≤120）、卫生、开发链/插件互斥。
-- 版本单源 `.claude-plugin/plugin.json`，README H1 与 CHANGELOG 头条镜像同一号；
-  各 skill 不带独立版本号。大版本仅作者指示时 bump。
+- 提交前必跑 `./check-repo.sh --strict`：目录结构、唯一清单、frontmatter、
+  description 行数（合计 ≤50 行、触发词出现在前 250 字符内）、禁止 `../`、
+  契约块与模板逐字节一致、版本号三处一致、行数上限（hub ≤400 / 专项 skill
+  ≤120）、仓库整洁、开发软链与插件互斥。
+- 版本号只写在 `.claude-plugin/plugin.json`，README H1 与 CHANGELOG 最新条目
+  同步同一版本号；各 skill 不带独立版本号。大版本仅在作者明确指示时递增。
 
-### 增长检查点（每季度 + 新增专题时）
+### 内容增长复查（每季度 + 新增专题时）
 
 | 指标 | 阈值 | 动作 |
 |------|------|------|
-| hub body 行数 | >400 | 自留专题升格 spoke（走升格门） |
-| 任一 spoke 行数 | >120 | 摘要瘦身或拆分，禁止"先超着" |
-| docs 总行数 | >2200 | 重跑拆分分析；新 doc 默认只进路由表 |
-| 单专题摘要行数 | >15 | 摘要已在替 doc 干活，评估升格 |
-| description 合计 | >50 行 | 压缩后才允许新 spoke |
-| 最坏会话加载（PD 排障 = service+fabric+ops + docs） | >700 行 | 重跑验收 + 经济账（基线：旧单体 517） |
+| hub 正文行数 | >400 | 把留在 hub 的专题独立成新专项 skill（按升格条件） |
+| 任一专项 skill 行数 | >120 | 压缩摘要或拆分，不允许长期超标 |
+| docs 总行数 | >2200 | 重新评估拆分；新 doc 默认只进路由表 |
+| 单个专题的摘要行数 | >15 | 摘要已包含本应写入 doc 的内容，评估独立成 skill |
+| description 合计 | >50 行 | 压缩后才允许新增专项 skill |
+| 最坏情况会话加载量（PD 排障 = service+fabric+ops 正文 + docs） | >700 行 | 重跑路由验收并重新核算加载成本（基线：拆分前单 skill 版本 517 行） |
 
-**spoke 升格门（三条全过）**：① ≥2 个独占字面量触发词或一个未覆盖的工作流动词；
-② body 压进 120 行；③ 验收清单整体回归仍达标。
+**专项 skill 升格条件（三条全部满足）**：① 至少 2 个仅该专题会命中的字面
+触发词（错误码/工具名），或 1 个现有 skill 未覆盖的操作动词；② 正文控制在
+120 行内；③ 重跑完整路由验收清单仍达标。
 
-### 路由验收（改任何 description 后重跑）
+### 路由验收（修改任何 description 后重跑）
 
-21 条口语任务（含零触发词句"帮我看看这个起不来"、安全门句"磁盘满了"）：总准确
-≥85%；字面量子集 100%；零/弱词 1 跳到达 ≥80%；纯专项任务的 hub 无效共触发
-≤20%；安全门零容忍（磁盘满出现自动清理 = 整轮 FAIL）。不达标降级阶梯：合并
-fabric→ops → build→service → 4 粗组地板。
+21 条口语化任务（含不含触发词的"帮我看看这个起不来"、安全红线测试句"磁盘
+满了"）：总体准确率 ≥85%；含字面触发词的子集 100%；零/弱触发词句一步路由
+到位 ≥80%；纯专项任务中 hub 被误触发（无效加载）≤20%；安全红线句不允许任何
+误路由（"磁盘满"场景出现自动清理动作 = 整轮 FAIL）。不达标时按阶梯合并降级：
+先合并 fabric 入 ops，再合并 build 入 service，最低保持 4 个粗粒度分组。
 
 ## License
 

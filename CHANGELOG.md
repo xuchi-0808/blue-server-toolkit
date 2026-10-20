@@ -4,26 +4,32 @@
 
 ## 3.0.0 (2026-10-20)
 
-架构重构：单 skill 仓 → **一仓一插件、7 个任务域 skill**（大版本，含破坏性布局变更）。
+架构重构：单 skill 仓 → **一仓一插件、7 个按任务领域拆分的 skill**（大版本，含
+破坏性布局变更）。
 
-- **skills/**：新增 7 skill——`blue-server-toolkit`（hub：日常操作+路由表+红线）、
-  `blue-npu-ops`（进程清理/A3 编号/算力）、`blue-npu-fabric`（RoCE/950DT fabric，
-  EI 码字面量路由）、`blue-vllm-service`（服务/PD/graph/TP 速查）、
-  `blue-vllm-ascend-build`（编译+rsync-chown 备忘）、`blue-vllm-profiling`
-  （采集+判读）、`blue-server-provisioning`（HDK/建容器/镜像 ID）；原 SKILL.md
-  的 15 段进阶摘要随属主 skill 迁移，hub 换为路由表
-- **.claude-plugin/**：新增唯一插件清单 plugin.json + marketplace.json
-  （ZCode 兼容识别 `.claude-plugin`，不建双清单）；版本单源落 plugin.json，
-  README H1 / CHANGELOG 头条镜像，各 skill 撤独立版本号
-- **templates/skill-contract.md**：运行时契约+安全红线单源，全文复制进全部 7 个
-  skill（不再用摘要压缩）
-- **运行时契约**：`~/.blue_server_toolkit/` 统一安装保留，新增 `.assets-version`
-  版本戳 + hub 首激活比对同步（治运行时 docs 手动 cp 漂移）；SKILL.md 正文资产
-  引用一律绝对路径、`../` 零容忍、docs 永不内联
-- **工程**：新增 `link-dev.sh`（四工具逐 skill 软链，--check/--unlink/--prune-old，
-  开发链与插件安装互斥）与 `check-repo.sh` 合入门禁（契约块一致性/版本三镜像/
-  行数预算 hub≤400 spoke≤120/description 合计 ≤50 行触发词前置）
-- **README**：全文重写（安装双轨/skills 表/增长检查点/spoke 升格门/路由验收标准）
+- **skills/**：新增 7 个 skill——`blue-server-toolkit`（hub：日常操作+路由表+
+  红线）、`blue-npu-ops`（进程清理/A3 编号/算力）、`blue-npu-fabric`
+  （RoCE/950DT fabric，按 EI 错误码字面量路由）、`blue-vllm-service`
+  （服务/PD/graph/TP 速查）、`blue-vllm-ascend-build`（编译+rsync-chown 备忘）、
+  `blue-vllm-profiling`（采集+判读）、`blue-server-provisioning`
+  （HDK/建容器/镜像 ID）；原 SKILL.md 的 15 段进阶摘要随所属 skill 迁移，
+  hub 换为路由表
+- **.claude-plugin/**：新增唯一插件清单 plugin.json + marketplace.json（ZCode
+  也能识别 `.claude-plugin/`，无需第二份清单）；版本号以 plugin.json 为唯一
+  来源，README H1 与 CHANGELOG 最新条目同步同一版本号，各 skill 不再带独立
+  版本号
+- **templates/skill-contract.md**：运行时契约与安全红线以该文件为单一来源，
+  全文复制进全部 7 个 skill（不再压缩成摘要）
+- **运行时约定**：`~/.blue_server_toolkit/` 统一安装保留，新增
+  `.assets-version` 版本标记文件 + hub 首次激活时比对并自动同步（解决运行时
+  docs 手动 cp 导致的版本漂移）；SKILL.md 正文对 docs/scripts 的引用一律写
+  绝对路径、禁止 `../`、docs 永不内联进 skill 正文
+- **工程**：新增 `link-dev.sh`（为四个工具逐 skill 建软链，含
+  --check/--unlink/--prune-old；开发软链与插件安装互斥）与 `check-repo.sh`
+  合并前检查（契约块一致性/版本号三处一致/行数上限 hub≤400、专项 skill≤120/
+  description 合计 ≤50 行且触发词在前 250 字符内）
+- **README**：全文重写（两种安装方式/skills 表/内容增长复查/专项 skill 升格
+  条件/路由验收标准）
 
 ## 2.5.0 (2026-10-20)
 
