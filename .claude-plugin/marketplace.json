@@ -1,5 +1,6 @@
 {
   "name": "blue-server-toolkit",
+  "description": "Local marketplace for the blue-server-toolkit plugin (Ascend NPU remote server operations).",
   "owner": { "name": "xuchi" },
   "plugins": [
     {

@@ -1,10 +1,9 @@
 ---
 name: blue-vllm-profiling
 description: >-
-  Use for vLLM-on-Ascend profiling capture and interpretation: torch profiler
-  launch flags, /start_profile /stop_profile mechanics, steady-state windows,
-  stop-serve verification, analyse() per rank, step_trace_time buckets,
-  per-operator attribution, bottleneck triage.
+  Use for vLLM-on-Ascend profiling capture and interpretation: launch flags,
+  /start_profile /stop_profile, steady-state windows, per-rank analyse(),
+  step_trace_time buckets, operator attribution, bottleneck triage.
   触发：profiling、性能采集、start_profile 404、稳态窗口、trace、算子占比、
   通信占比、step_trace、瓶颈归因、TPOT 不达标、拓扑对比。Not for 起服务
   (blue-vllm-service)、编译 (blue-vllm-ascend-build)。

@@ -8,7 +8,7 @@ set -uo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$REPO_ROOT"
 STRICT="${1:-}"
-hard=0; warn=0
+hard=0; warn=
 fail() { echo "FAIL  $*"; hard=1; }
 warnn() { echo "WARN  $*"; warn=1; [[ "$STRICT" == "--strict" ]] && hard=1; }
 
@@ -29,7 +29,8 @@ pname="$(python3 -c "import json;print(json.load(open('.claude-plugin/plugin.jso
 ### 3. 清单合法性（装有 claude CLI 时走官方校验；否则手动检查其中子项）
 if command -v claude >/dev/null 2>&1; then
   if out="$(claude plugin validate "$REPO_ROOT" 2>&1)"; then
-    echo "INFO  claude plugin validate: passed"
+    echo "INFO  claude plugin validate: passed（完整输出如下，warning 原样透出）"
+    echo "$out" | sed 's/^/      /'
   else
     fail "claude plugin validate 未通过: $(echo "$out" | tail -3)"
   fi

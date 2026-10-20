@@ -80,6 +80,7 @@ docs/
 ├── npu-process-cleanup.md        # NPU 进程清理与 HBM 释放（blue-npu-ops）
 ├── npu-roce-connectivity.md      # NPU 跨机互联检查（blue-npu-fabric）
 ├── pd-disagg-bringup.md          # PD 分离拉起与排障（blue-vllm-service）
+├── routing-acceptance.md         # 路由验收清单 21 条（改 description 后重跑）
 ├── ssh-connection-stability.md   # SSH 连接稳定性（hub）
 ├── vllm-ascend-build.md          # vllm-ascend 源码编译（blue-vllm-ascend-build）
 ├── vllm-profiling-analysis.md    # profiling 分析判读（blue-vllm-profiling）
@@ -93,7 +94,7 @@ docs/
 
 ```
 blue-server-toolkit/
-├── .claude-plugin/{plugin.json,marketplace.json}  # 唯一插件清单（ZCode 也能识别）
+├── .claude-plugin/{plugin.json,marketplace.json}  # 唯一插件清单（ZCode 也能识别该布局；依据是本机已装 ZCode 插件均为 .claude-plugin 形态，本插件实装冒烟待做）
 ├── skills/<name>/SKILL.md × 7                     # hub + 6 个专项 skill
 ├── docs/ · scripts/ · config.example.json         # docs 与 scripts（安装到 ~/.blue_server_toolkit/）
 ├── templates/skill-contract.md                    # 契约与红线单一来源（复制进每个 skill）
@@ -106,7 +107,7 @@ blue-server-toolkit/
 - 提交前必跑 `./check-repo.sh --strict`：目录结构、唯一清单、frontmatter、
   description 行数（合计 ≤50 行、触发词出现在前 250 字符内）、禁止 `../`、
   契约块与模板逐字节一致、版本号三处一致、行数上限（hub ≤400 / 专项 skill
-  ≤120）、仓库整洁、开发软链与插件互斥。
+  ≤120）、仓库整洁、ZCode 端插件安装与开发软链共存检测（Claude 端未覆盖）。
 - 版本号只写在 `.claude-plugin/plugin.json`，README H1 与 CHANGELOG 最新条目
   同步同一版本号；各 skill 不带独立版本号。大版本仅在作者明确指示时递增。
 
@@ -115,7 +116,7 @@ blue-server-toolkit/
 | 指标 | 阈值 | 动作 |
 |------|------|------|
 | hub 正文行数 | >400 | 把留在 hub 的专题独立成新专项 skill（按升格条件） |
-| 任一专项 skill 行数 | >120 | 压缩摘要或拆分，不允许长期超标 |
+| 任一专项 skill 行数 | >120 | 压缩摘要或拆分，不允许超限 |
 | docs 总行数 | >2200 | 重新评估拆分；新 doc 默认只进路由表 |
 | 单个专题的摘要行数 | >15 | 摘要已包含本应写入 doc 的内容，评估独立成 skill |
 | description 合计 | >50 行 | 压缩后才允许新增专项 skill |
@@ -127,11 +128,11 @@ blue-server-toolkit/
 
 ### 路由验收（修改任何 description 后重跑）
 
-21 条口语化任务（含不含触发词的"帮我看看这个起不来"、安全红线测试句"磁盘
-满了"）：总体准确率 ≥85%；含字面触发词的子集 100%；零/弱触发词句一步路由
-到位 ≥80%；纯专项任务中 hub 被误触发（无效加载）≤20%；安全红线句不允许任何
-误路由（"磁盘满"场景出现自动清理动作 = 整轮 FAIL）。不达标时按阶梯合并降级：
-先合并 fabric 入 ops，再合并 build 入 service，最低保持 4 个粗粒度分组。
+题目清单与评分规则见 `docs/routing-acceptance.md`（21 条口语化任务，含安全
+红线测试句）。要点：总体准确率 ≥85%；含字面触发词的子集 100%；零/弱触发词句
+一步路由到位 ≥80%；纯专项任务中 hub 被误触发（无效加载）≤20%；安全红线句零
+容忍（"磁盘满"场景出现自动清理动作 = 整轮 FAIL）。不达标时按顺序合并：先
+fabric 入 ops，再 build 入 service，最终保留 4 个粗粒度分组。
 
 ## License
 

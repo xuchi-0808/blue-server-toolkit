@@ -55,7 +55,7 @@ description: >-
 
 多机 PD/MC2 的跨机数据走 NPU RDMA，主机之间互 ping 通不算数。检查：
 `hccn_tool -i 0 -vnic -g` 取 IP → `hccn_tool -i 0 -hccs_ping -g address
-<对端IP>` 实测（A2 用 `-ping`）；TLS 配置各机须一致。
+<对端IP>` 实际测试（A2 用 `-ping`）；TLS 配置各机须一致。
 
 - **坑**：`-link -g` 报 DOWN 在部分环境是误报，勿据此判断物理链路不通；
   hccs_ping 只覆盖 NPU 侧网络，PD 的 dp-rpc/proxy 走主机侧 TCP——跨机前每台

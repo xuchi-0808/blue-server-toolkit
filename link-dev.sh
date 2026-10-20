@@ -11,13 +11,15 @@
 #
 # 规则：
 #   - 目标位置是其他仓库的实体目录、或指向别处的链接 → 报冲突并拒绝改动
-#     （绝不覆盖无关 skill）
+#     （绝不覆盖无关 skill），退出码非 0
 #   - ~/.codex/skills/.system/ 永不触碰
 #   - 开发软链与插件安装互斥：装插件前先 --unlink（软链注册不带前缀的
 #     skill 名，插件注册带前缀的 plugin:skill 名，两者会同时加载两份）
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# pwd -P 取物理路径，与 readlink -f 的解析口径一致，
+# 避免仓库位于含软链的路径下时误判 CONFLICT
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 SKILLS_DIR="$REPO_ROOT/skills"
 TARGETS=(
   "$HOME/.claude/skills"
@@ -63,9 +65,15 @@ for base in "${TARGETS[@]}"; do
 
     if [[ "$MODE" == "unlink" ]]; then
       if [[ -L "$link" ]]; then
-        resolved="$(rp "$link")" || resolved=""
         direct="$(readlink "$link")"
-        if [[ "$resolved" == "$REPO_ROOT"* || "$direct" == *"blue-server-toolkit"* ]]; then
+        resolved="$(rp "$link")" || resolved=""
+        # 链条中间环节已被删除时 readlink -f 会失败：对直连目标再解析一层
+        if [[ -z "$resolved" && -e "$direct" ]]; then
+          resolved="$(rp "$direct")" || resolved=""
+        fi
+        # 只按"最终解析是否落在本仓库内"判定，不做文件名子串匹配，
+        # 避免误删路径里恰好含插件名的其他仓库链接（如插件缓存目录）
+        if [[ "$resolved" == "$REPO_ROOT"* ]]; then
           rm "$link" && summary+=("unlinked  $tool/$name")
         fi
       fi
@@ -86,22 +94,32 @@ for base in "${TARGETS[@]}"; do
     if [[ -L "$link" ]]; then
       resolved="$(rp "$link")" || resolved=""
       if [[ "$resolved" == "$want" ]]; then
-        [[ "$MODE" == "check" ]] && summary+=("ok        $tool/$name")
+        if [[ "$MODE" == "check" ]]; then
+          summary+=("ok        $tool/$name")
+        elif [[ "$(readlink "$link")" != "$want" ]]; then
+          # 解析正确但是经其他链接中转（如 ~/.zcode -> ~/.claude）：
+          # 改成直链，消除对中间链接的隐性依赖
+          ln -sfn "$want" "$link" && summary+=("normalized $tool/$name (direct link)")
+        fi
       elif [[ "$resolved" == "$REPO_ROOT"* ]]; then
         # 指向本仓库但目标不对（含旧的单 skill 链接、嵌套软链）→ 原子修复
         if [[ "$MODE" == "check" ]]; then
-          summary+=("stale     $tool/$name -> $resolved"); fail=1
+          summary+=("stale     $tool/$name -> ${resolved}")
+          fail=1
         else
-          ln -sfn "$want" "$link" && summary+=("repaired  $tool/$name (was $resolved)")
+          ln -sfn "$want" "$link" && summary+=("repaired  $tool/$name (was ${resolved})")
         fi
       else
-        summary+=("CONFLICT  $tool/$name -> $resolved（非本仓库，拒绝改动）"); fail=1
+        summary+=("CONFLICT  $tool/$name -> ${resolved}（非本仓库，拒绝改动）")
+        fail=1
       fi
     elif [[ -e "$link" ]]; then
-      summary+=("CONFLICT  $tool/$name 是实体目录/文件，拒绝改动"); fail=1
+      summary+=("CONFLICT  $tool/$name 是实体目录/文件，拒绝改动")
+      fail=1
     else
       if [[ "$MODE" == "check" ]]; then
-        summary+=("missing   $tool/$name"); fail=1
+        summary+=("missing   $tool/$name")
+        fail=1
       else
         mkdir -p "$base"
         ln -s "$want" "$link" && summary+=("created   $tool/$name")
@@ -113,8 +131,8 @@ done
 printf '%s\n' "${summary[@]}" | sort
 echo "---"
 if [[ "$MODE" == "check" ]]; then
-  [[ $fail -eq 0 ]] && echo "OK: ${#SKILLS[@]} 个 skill 在 ${#TARGETS[@]} 个工具下的链接全部就绪" \
-                    || { echo "CHECK FAILED（见上方 missing/stale/CONFLICT）"; exit 1; }
+  [[ $fail -eq 0 ]] && echo "OK: ${#SKILLS[@]} 个 skill 在 ${#TARGETS[@]} 个工具下的链接全部就绪"
 else
   echo "完成。验证：在四个工具里各开一个新会话，确认 ${#SKILLS[@]} 个 blue-* skill 出现（hub 应为 3.x 版内容）。"
 fi
+[[ $fail -eq 0 ]] || { [[ "$MODE" == "check" ]] && echo "CHECK FAILED（见上方 missing/stale/CONFLICT）"; exit 1; }

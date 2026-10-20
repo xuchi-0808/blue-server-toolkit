@@ -2,9 +2,9 @@
 name: blue-vllm-service
 description: >-
   Use for the vLLM-on-Ascend service lifecycle: start/stop vllm serve in
-  containers, health checks, multi-service port/chip layout, launch params,
-  P/D disaggregation bring-up (mooncake, load-balance proxy), TP/parallelism
-  planning, graph-mode debugging.
+  containers, health checks, multi-service layout, P/D disaggregation
+  bring-up (mooncake, load-balance proxy), TP/parallelism planning,
+  graph-mode debugging.
   触发：起服务/停服务、vllm serve 启动、PD 分离、P/D、mooncake、proxy、TP、
   并行度、多服务并行、served name 404、enforce-eager、精度异常、cudagraph。
   Not for 源码编译 (blue-vllm-ascend-build)、profiling (blue-vllm-profiling)、
@@ -83,10 +83,8 @@ max-model-len 超 KV 显存 → triton 严格模式
 
 ## TP ↔ 卡数速查（A3）
 
-A3 单卡双芯：chip ID = NPU号 × 2 + 芯片序号，`ASCEND_RT_VISIBLE_DEVICES` 用
-全局 chip ID（0-15）。TP4 = 4 chip = 2 张 NPU；TP8 = 8 chip = 4 张 NPU。
-950DT（A5）单卡单芯无 ×2 换算。完整对照表：
-`~/.blue_server_toolkit/docs/a3-chip-numbering.md`（属 blue-npu-ops）。
+A3：TP4 = 2 张 NPU、TP8 = 4 张 NPU（chip ID 换算与 950DT 对照全表见
+`~/.blue_server_toolkit/docs/a3-chip-numbering.md`，属 blue-npu-ops）。
 
 ## Graph 模式调试
 
@@ -101,6 +99,6 @@ graph 相关（如 Python property 被静态化）；问题仍在 → 非 graph�
 | 症状 | 去向 |
 |------|------|
 | 占卡者清理、kill 后 HBM 不回、Free memory 不足 | `~/.blue_server_toolkit/docs/npu-process-cleanup.md`（属 blue-npu-ops） |
-| EI0004/EI0016、E19999、跨机 ret=-1 | `~/.blue_server_toolkit/docs/npu-roce-connectivity.md`、`a5-950dt-fabric-config.md`（属 blue-npu-fabric） |
+| EI0004/EI0016、E19999、跨机 ret=-1 | `~/.blue_server_toolkit/docs/npu-roce-connectivity.md`、`~/.blue_server_toolkit/docs/a5-950dt-fabric-config.md`（属 blue-npu-fabric） |
 | rootinfo 挂载读取异常 | hub「Docker bind-mount 陷阱」节 |
 | 带采集参数的拉起、稳态窗口 | blue-vllm-profiling |

@@ -12,8 +12,9 @@
   （RoCE/950DT fabric，按 EI 错误码字面量路由）、`blue-vllm-service`
   （服务/PD/graph/TP 速查）、`blue-vllm-ascend-build`（编译+rsync-chown 备忘）、
   `blue-vllm-profiling`（采集+判读）、`blue-server-provisioning`
-  （HDK/建容器/镜像 ID）；原 SKILL.md 的 15 段进阶摘要随所属 skill 迁移，
-  hub 换为路由表
+  （HDK/建容器/镜像 ID）；原 SKILL.md 进阶指南的 16 段专题摘要重新安置：
+  15 段随所属 skill 迁移，「服务器配置与存储」并入 hub 经验备忘；hub 改为
+  路由表 + 保留 4 个专题节（SSH 稳定性/镜像源/bind-mount/G 区）
 - **.claude-plugin/**：新增唯一插件清单 plugin.json + marketplace.json（ZCode
   也能识别 `.claude-plugin/`，无需第二份清单）；版本号以 plugin.json 为唯一
   来源，README H1 与 CHANGELOG 最新条目同步同一版本号，各 skill 不再带独立
@@ -23,13 +24,17 @@
 - **运行时约定**：`~/.blue_server_toolkit/` 统一安装保留，新增
   `.assets-version` 版本标记文件 + hub 首次激活时比对并自动同步（解决运行时
   docs 手动 cp 导致的版本漂移）；SKILL.md 正文对 docs/scripts 的引用一律写
-  绝对路径、禁止 `../`、docs 永不内联进 skill 正文
+  绝对路径、禁止 `../`、docs 不内联进 skill 正文（一律经运行时目录按需读取）
 - **工程**：新增 `link-dev.sh`（为四个工具逐 skill 建软链，含
   --check/--unlink/--prune-old；开发软链与插件安装互斥）与 `check-repo.sh`
   合并前检查（契约块一致性/版本号三处一致/行数上限 hub≤400、专项 skill≤120/
-  description 合计 ≤50 行且触发词在前 250 字符内）
+  description 合计 ≤50 行且触发词在前 250 字符内）；新增
+  `docs/routing-acceptance.md` 路由验收题目清单（21 条，修改 description 后
+  重跑）
 - **README**：全文重写（两种安装方式/skills 表/内容增长复查/专项 skill 升格
   条件/路由验收标准）
+- **范围说明**：语言清理覆盖 skills/、README、templates、两个脚本与本条目；
+  docs/ 其余 15 篇正文与 2.x 历史条目保留原文，不做追溯清理
 
 ## 2.5.0 (2026-10-20)
 

@@ -80,4 +80,11 @@ setuptools 重试"的 FAQ 区分**：metadata generation failed 在 rsync 传代
 ## pip 卡在 Downloading
 
 不是网络慢，是 pypi.org 直连挂死——配全局源（契约第 2 条）后重跑；命令示例里
-显式写 `-i` 只是未配全局源时的兜底写法。FAQ 全表见上方文档。
+显式写 `-i` 只是未配全局源时的兜底写法。FAQ 全表见下方文档。
+
+## 相关文档
+
+| 症状 | 去向 |
+|------|------|
+| 按 pip/编译报错关键字查解法（Metadata generation failed、setuptools 相关、SIGKILL 137、NFS 时钟偏差、fla_npu OPP 冲突、cargo 源不可达等） | `~/.blue_server_toolkit/docs/vllm-ascend-build.md` |
+| 装完后的服务拉起与验证 | blue-vllm-service |
