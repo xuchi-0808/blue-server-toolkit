@@ -12,10 +12,10 @@ description: >-
 
 # Blue Server Provisioning（裸机装机与建容器）
 
-> 本 skill 只覆盖装机与容器创建；日常容器操作 → hub（blue-server-toolkit），拉镜像 → hub 镜像源节。
+> 本 skill 只覆盖装机与容器创建；日常容器操作 → hub（blue-server-toolkit），拉镜像 → hub 的镜像源一节。
 
 <!-- BEGIN blue-skill-contract -->
-> **运行时契约**（全部 blue-* skill 共享；单点定义于 templates/skill-contract.md）
+> **运行时契约**（全部 blue-* skill 共享；唯一定义处 templates/skill-contract.md）
 >
 > 1. 机器信息只读 `~/.blue_server_toolkit/config.json`（host/user/container）与
 >    `notes/`；个人环境信息（IP、机器清单、任务状态）禁止写回本仓。
@@ -23,8 +23,8 @@ description: >-
 >    蓝区装任何包之前先配全局源
 >    `pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/`。
 > 3. 长命令输出重定向日志再分段看：`cmd > <日志路径> 2>&1; echo EXIT=$?` 后
->    `tail`/`grep`；禁止 `| tail` 截断 stdout（管道使 `$?` 失真）。日志放用户
->    指定的工作目录，未指定时放 `/tmp/<任务名>/`。
+>    `tail`/`grep`；禁止 `| tail` 截断 stdout（管道后 `$?` 反映的是 tail 的
+>    退出码）。日志放用户指定的工作目录，未指定时放 `/tmp/<任务名>/`。
 > 4. 共享机礼仪：长时间占用 NPU 先 `wall` 广播声明；确需动他人容器，逐台记录
 >    （容器名/镜像/状态），只 stop 不 rm，测完按记录恢复。
 
@@ -71,12 +71,13 @@ start-docker 脚本映射所需的 4 类设备文件全部自动生成。
 | start-docker-A5.sh | A5（Ascend 950） | `bash start-docker-A5.sh <image_id> <name>` |
 
 **容器创建前确认**：上下文中没有明确镜像 ID 和容器名时，先向用户询问用什么
-镜像、容器名起什么；用户授权"你自己看着办"后才自行决定。
+镜像、容器名叫什么；用户授权"你自己看着办"后才自行决定。
 
-**同日多 flavor 同名系镜像以镜像 ID 为准**：同一台机常并存多个名字相近的同日
-构建镜像（不同 OS 底座/flavor），创建容器只认完整镜像 ID，勿按名字短前缀猜。
+**同日构建的多个同名/近名镜像以镜像 ID 为准**：同一台机常并存多个名字相近的
+同日构建镜像（不同 OS 基础镜像/flavor），创建容器只认完整镜像 ID，不要凭名字
+短前缀猜。
 
-## 下钻表
+## 相关文档
 
 | 症状 | 去向 |
 |------|------|

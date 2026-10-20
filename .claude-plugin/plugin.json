@@ -1,7 +1,7 @@
 {
   "name": "blue-server-toolkit",
   "version": "3.0.0",
-  "description": "Ascend NPU blue-zone remote server operations: daily-ops hub plus specialized skills for NPU process/fabric, vLLM service/build/profiling, and bare-metal provisioning.",
+  "description": "Operations toolkit for Ascend NPU remote dev servers in the blue zone: a hub skill for daily operations, plus specialized skills for NPU process management and fabric connectivity, vLLM serving/build/profiling, and bare-metal provisioning.",
   "author": { "name": "xuchi" },
   "license": "MIT",
   "skills": "./skills"
