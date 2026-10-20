@@ -2,9 +2,8 @@
 name: blue-server-provisioning
 description: >-
   Use for fresh Ascend server and container bring-up: bare-metal HDK
-  driver+firmware install (tar precondition, kernel-devel match, HwHiAiUser,
-  driver-before-firmware), start-docker-A2/A3/A5.sh container creation,
-  image-ID discipline for same-day same-name builds.
+  driver+firmware install (HwHiAiUser, driver-before-firmware),
+  start-docker-A2/A3/A5.sh container creation, image-ID discipline.
   触发：新服务器、裸机、装驱动、固件、HDK、npu-smi 不可用、建容器、
   start-docker、镜像 ID。Not for 日常 docker start/exec/logs
   (blue-server-toolkit)、NPU 进程问题 (blue-npu-ops)、拉镜像 (hub 镜像源节)。

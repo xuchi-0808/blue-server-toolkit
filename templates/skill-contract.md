@@ -2,7 +2,7 @@
 
 > 本文件是全部 `skills/*/SKILL.md` 顶部「运行时契约 + 安全红线」块的**唯一编辑点**。
 > 修改锚点之间的内容后，把该块原样复制到每个 skill（check-repo.sh 会逐字节比对），
-> 再按 AGENTS.md 的规则递增版本号。
+> 再按 README「提交前检查与版本」一节的规则递增版本号。
 
 <!-- BEGIN blue-skill-contract -->
 > **运行时契约**（全部 blue-* skill 共享；唯一定义处 templates/skill-contract.md）

@@ -3,7 +3,7 @@ name: blue-npu-ops
 description: >-
   Use for single-server NPU ops: npu-smi reading, HBM usage and orphan
   release, killing leftover processes (precise PID, never pkill -f python),
-  idle checks, chip numbering, TP-to-chip planning, FLOPS measurement.
+  idle checks, chip numbering, FLOPS measurement.
   触发：npu-smi、HBM 占用/不释放、显存占满、杀进程、进程残留、机器空不空、
   chip 编号、VISIBLE_DEVICES、算力实测。Not for 跨机 fabric/RoCE
   (blue-npu-fabric)、vLLM 生命周期 (blue-vllm-service)、装驱动
@@ -102,5 +102,5 @@ A3 单卡双芯：8 卡 = 16 chip。`ASCEND_RT_VISIBLE_DEVICES` 用全局 chip I
 | 症状 | 去向 |
 |------|------|
 | 服务重启报 Free memory 不足、kill 后显存长时间不回 | `~/.blue_server_toolkit/docs/npu-process-cleanup.md` |
-| 跨机 EI0004/EI0016/E19999、hccs_ping | `~/.blue_server_toolkit/docs/npu-roce-connectivity.md` 与 `a5-950dt-fabric-config.md`（属 blue-npu-fabric） |
+| 跨机 EI0004/EI0016/E19999、hccs_ping | `~/.blue_server_toolkit/docs/npu-roce-connectivity.md` 与 `~/.blue_server_toolkit/docs/a5-950dt-fabric-config.md`（属 blue-npu-fabric） |
 | 停 vllm 服务的完整流程 | blue-vllm-service（kill 前需先确认，见上方红线） |

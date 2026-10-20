@@ -1,10 +1,10 @@
 ---
 name: blue-server-toolkit
 description: >-
-  Use for daily ops on blue-zone remote servers: SSH connection and
-  stability, code sync, UT runs, model downloads, log viewing, file transfer,
-  docker pull/start/exec, image mirrors, G-zone downloads, config management;
-  also the fallback router when unsure which sibling skill fits.
+  Use for daily ops on blue-zone remote servers: code sync, UT runs, model
+  downloads, log viewing, file transfer, docker pull/start/exec, image
+  mirrors, config management; also the fallback router when unsure which
+  sibling skill fits.
   触发方式：提到"同步代码""跑 UT""下模型""看日志""传文件""docker pull 慢"
   "加服务器/改配置""G 区下载""SSH 老断""磁盘满""不确定用哪个 skill"时。
   NOT for NPU HBM/process/chip, cross-machine fabric, vLLM serve/PD, source
@@ -104,6 +104,8 @@ printf '%s\n' "$V" > "$RT/.assets-version"
 printf '%s\n' "$ROOT" > "$RT/.source-repo"
 ```
 
+- 代码块中 `<本SKILL.md所在目录>` 占位符替换为本 skill 的加载路径（即本
+  SKILL.md 所在目录，软链形态下直接填链接路径即可，realpath 会解析）。
 - 每次激活先比对 `~/.blue_server_toolkit/.assets-version` 与 plugin.json 的
   version，不一致就重拷 docs/scripts 并更新版本标记文件——运行时副本落后是
   已知的失效方式。
