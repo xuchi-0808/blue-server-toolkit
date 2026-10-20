@@ -15,8 +15,9 @@
   （HDK/建容器/镜像 ID）；原 SKILL.md 进阶指南的 16 段专题摘要重新安置：
   15 段随所属 skill 迁移，「服务器配置与存储」并入 hub 经验备忘；hub 改为
   路由表 + 保留 4 个专题节（SSH 稳定性/镜像源/bind-mount/G 区）
-- **.claude-plugin/**：新增唯一插件清单 plugin.json + marketplace.json（ZCode
-  也能识别 `.claude-plugin/`，无需第二份清单）；版本号以 plugin.json 为唯一
+- **.claude-plugin/**：新增唯一插件清单 plugin.json + marketplace.json
+  （ZCode 也能识别 `.claude-plugin/` 布局，静态依据是本机已装 ZCode 插件均为
+  此形态；无需第二份清单）；版本号以 plugin.json 为唯一
   来源，README H1 与 CHANGELOG 最新条目同步同一版本号，各 skill 不再带独立
   版本号
 - **templates/skill-contract.md**：运行时契约与安全红线以该文件为单一来源，

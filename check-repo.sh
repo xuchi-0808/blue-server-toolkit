@@ -50,7 +50,7 @@ for key in ('skills','commands','hooks','mcpServers','agents'):
 PY
 
 ### 4-5,10. frontmatter 与 description 行数（用 python 逐个 skill 检查）
-python3 - "$STRICT" <<'PY' || hard=1
+pyout="$(python3 - "$STRICT" <<'PY'
 import sys, re, pathlib
 strict = sys.argv[1] == "--strict"
 fail = warn = False
@@ -81,8 +81,16 @@ print(f"INFO  description 合计 {desc_lines_total} 行")
 if desc_lines_total > 60: print("FAIL  description 合计 >60 行"); fail = True
 elif desc_lines_total > 50: print("WARN  description 合计 >50 行（目标 ≤50）"); warn = True
 if warn and strict: fail = True
+if warn: print("SETWARN")
 sys.exit(1 if fail else 0)
 PY
+)" || hard=1
+printf '%s\n' "$pyout" | grep -v '^SETWARN$' || true
+# python 级 warning 回写 shell 标志，保证汇总行"（含 warning）"与 WARN 行一致
+if printf '%s\n' "$pyout" | grep -q '^SETWARN$'; then
+  warn=1
+  [[ "$STRICT" == "--strict" ]] && hard=1
+fi
 
 ### 6. 引用规范：SKILL.md 内禁止 ../；不带安装前缀的 docs/ 引用仅告警
 while IFS= read -r -d '' f; do
